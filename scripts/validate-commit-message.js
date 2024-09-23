@@ -1,40 +1,45 @@
 const { execSync } = require('child_process');
 
 const forbiddenMessages = [
-    'WIP',           
-    'temp',           
-    'fix',          
-    'update',        
-    'dummy',           
-    'initial commit',  
-    'bugfix',          
-    'minor changes',  
-    'refactor',      
-    'chore',         
-    'changes',       
-    'remove unused code', 
-    'code cleanup',
-    'test',          
-    'some changes',    
-    'fix typo',      
-    'bump version',
-    'improvements',    
-    'fix issue',      
-    'this is a commit',
-    'another commit',  
-    'updated files'    
-  ];
-  
+  'WIP',
+  'temp',
+  'fix',
+  'update',
+  'dummy',
+  'initial commit',
+  'bugfix',
+  'minor changes',
+  'refactor',
+  'chore',
+  'changes',
+  'remove unused code',
+  'code cleanup',
+  'test',
+  'some changes',
+  'fix typo',
+  'bump version',
+  'improvements',
+  'fix issue',
+  'this is a commit',
+  'another commit',
+  'updated files'
+];
 
 const validateCommitMessage = () => {
   try {
     const commitMessage = execSync('git log -1 --pretty=%B').toString().trim();
 
-    const commitMessagePattern = /^.{1,60}$/; 
+    const commitMessagePattern = /^.{1,60}$/;
+    const wordCount = commitMessage.split(/\s+/).length;
 
     if (forbiddenMessages.includes(commitMessage.toLowerCase())) {
       console.error(`Error: Commit message "${commitMessage}" is forbidden.
         Please avoid using generic messages such as: ${forbiddenMessages.join(', ')}.`);
+      process.exit(1);
+    }
+
+    if (wordCount < 2) {
+      console.error(`Error: Commit message "${commitMessage}" must contain at least 2 words.`);
       process.exit(1);
     }
 
