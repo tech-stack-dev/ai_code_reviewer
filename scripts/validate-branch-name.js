@@ -5,9 +5,6 @@ const validateBranchName = () => {
     const branchName = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
     
     const patterns = {
-      main: /^main$/,
-      development: /^development$/,
-      integration: /^integration$/,
       feature: /^feature\/AICR-\d+-[a-z0-9-]+$/,
       bug: /^bug\/AICR-\d+-[a-z0-9-]+$/,
       release: /^release\/v\d+\.\d+(\.\d+)?$/,
@@ -21,15 +18,13 @@ const validateBranchName = () => {
     } else {
       console.error(`Error: Branch name "${branchName}" is not valid.
         Branch names should follow one of these patterns:
-        - main
-        - development
-        - integration
         - feature/AICR-<number>-brief-description
         - bug/AICR-<number>-brief-description
         - release/v<major>.<minor>[.<patch>]
         - hotfix/AICR-<number>-brief-description
         Examples:
         - feature/AICR-5678-new-feature
+        - bug/AICR-5678-fix-issue
         - release/v1.0
         - hotfix/AICR-5678-fix-bug`);
       process.exit(1);
