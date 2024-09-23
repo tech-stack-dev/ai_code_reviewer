@@ -9,8 +9,8 @@ const validateCommitMessage = (commitMessage) => {
 
   if (forbiddenCommitMessages.includes(commitMessage.toLowerCase())) {
     console.error(`Error: Commit message "${commitMessage}" is forbidden.
-      Please avoid using generic messages such as: ${forbiddenMessages.join(', ')}.`);
-    process.exit(1);
+      Please avoid using generic messages such as: ${forbiddenCommitMessages.join(', ')}.`);
+    process.exit(1)
   }
 
   if (wordCount < MIN_WORD_AMOUNT) {
