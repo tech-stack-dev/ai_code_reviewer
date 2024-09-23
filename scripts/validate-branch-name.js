@@ -9,6 +9,7 @@ const validateBranchName = () => {
       development: /^development$/,
       integration: /^integration$/,
       feature: /^feature\/AICR-\d+-[a-z0-9-]+$/,
+      bug: /^bug\/AICR-\d+-[a-z0-9-]+$/,
       release: /^release\/v\d+\.\d+(\.\d+)?$/,
       hotfix: /^hotfix\/AICR-\d+-[a-z0-9-]+$/
     };
@@ -24,6 +25,7 @@ const validateBranchName = () => {
         - development
         - integration
         - feature/AICR-<number>-brief-description
+        - bug/AICR-<number>-brief-description
         - release/v<major>.<minor>[.<patch>]
         - hotfix/AICR-<number>-brief-description
         Examples:
