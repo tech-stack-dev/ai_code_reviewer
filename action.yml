@@ -4,12 +4,11 @@ inputs:
   github_token:
     description: 'GitHub Token to access the API'
     required: true
-    default: ${{ secrets.GITHUB_TOKEN }}
   auto_trigger:
     description: 'Automatically trigger review on PR creation'
     required: false
     default: 'false'
 
 runs:
-  using: 'node22'  
+  using: 'node20'  
   main: 'dist/index.js'  
