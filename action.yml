@@ -10,7 +10,5 @@ inputs:
     default: 'false'
 
 runs:
-  using: 'node20'  
-  pre: |
-    npm install 
-  main: 'dist/main.js'
+  using: 'node20'
+  main: 'dist/bundle.js'
