@@ -13,13 +13,20 @@ async function run() {
   const eventData = JSON.parse(fs.readFileSync(eventPath, 'utf8'));
   const eventName = process.env.GITHUB_EVENT_NAME;
 
-  if (eventName === 'pull_request' || eventName === 'issue_comment') {
+  console.log(`Event Name: ${eventName}`);
+  console.log(`Event Data: ${JSON.stringify(eventData, null, 2)}`);
+
+  if (eventName === 'pull_request') {
     await commentOnPullRequest(eventData.pull_request);
+  } else if (eventName === 'issue_comment') {
+    await commentOnPullRequest(eventData.issue);
   }
 }
 
 async function commentOnPullRequest(pullRequest: any) {
   const { owner, repo, number } = pullRequest;
+
+  console.log(`Owner: ${owner}, Repo: ${repo}, Issue Number: ${number}`);
 
   await octokit.issues.createComment({
     owner,
