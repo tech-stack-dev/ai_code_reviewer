@@ -5,6 +5,8 @@ const MIN_WORD_AMOUNT = 2
 
 const validateCommitMessage = (commitMessage) => {
   const commitMessagePattern = /^.{1,60}$/;
+  const formatPattern = /^(feat|fix|docs|style|refactor|test|chore): .+/;
+
   const wordCount = commitMessage.split(/\s+/).length;
 
   if (forbiddenCommitMessages.includes(commitMessage.toLowerCase())) {
@@ -21,6 +23,11 @@ const validateCommitMessage = (commitMessage) => {
   if (!commitMessagePattern.test(commitMessage)) {
     console.error(`Error: Commit message "${commitMessage}" is not valid.
       Commit messages must be concise and ideally no more than 60 characters.`);
+    process.exit(1);
+  }
+
+  if (!formatPattern.test(commitMessage)) {
+    console.error(`Error: Commit message "${commitMessage}" must follow the format "type: subject".`);
     process.exit(1);
   }
 
