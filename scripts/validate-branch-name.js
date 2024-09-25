@@ -2,19 +2,25 @@ const { execSync } = require('child_process');
 
 const validateBranchName = () => {
   try {
-    const branchName = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
-    
+    const branchName = execSync('git rev-parse --abbrev-ref HEAD')
+      .toString()
+      .trim();
+
     const patterns = {
       feature: /^feature\/AICR-\d+-[a-z0-9-]+$/,
       bug: /^bug\/AICR-\d+-[a-z0-9-]+$/,
       release: /^release\/v\d+\.\d+(\.\d+)?$/,
-      hotfix: /^hotfix\/AICR-\d+-[a-z0-9-]+$/
+      hotfix: /^hotfix\/AICR-\d+-[a-z0-9-]+$/,
     };
 
-    const matchedType = Object.keys(patterns).find(type => patterns[type].test(branchName));
+    const matchedType = Object.keys(patterns).find((type) =>
+      patterns[type].test(branchName),
+    );
 
     if (matchedType) {
-      console.log(`Branch name "${branchName}" is valid (${matchedType} branch).`);
+      console.log(
+        `Branch name "${branchName}" is valid (${matchedType} branch).`,
+      );
     } else {
       console.error(`Error: Branch name "${branchName}" is not valid.
         Branch names should follow one of these patterns:
