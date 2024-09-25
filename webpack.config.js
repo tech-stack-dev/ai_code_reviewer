@@ -13,7 +13,6 @@ module.exports = {
     extensions: [".ts", ".js"],
     alias: {
         process: "process/browser",
-        '@/core': path.resolve(__dirname, 'src/core'),
     }
 },
   module: {

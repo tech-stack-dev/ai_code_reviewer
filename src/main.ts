@@ -1,7 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { MANUAL_FULL_PR_REVIEW_REQUEST_COMMAND } from './core';
 
 const githubToken = core.getInput('github_token');
 const autoTrigger = core.getInput('auto_trigger').toLowerCase() === 'true';
@@ -15,12 +14,6 @@ async function run() {
 
     if (context.eventName === 'pull_request' && autoTrigger) {
       await reviewPullRequest(payload.pull_request);
-    } else if (context.eventName === 'issue_comment' && payload.issue?.pull_request) {
-      if (payload.comment?.body.trim().toLowerCase() === MANUAL_FULL_PR_REVIEW_REQUEST_COMMAND) {
-        await reviewPullRequest(payload.issue);
-      } else {
-        console.log('Comment does not match review command');
-      }
     } else {
       console.log('Event does not meet criteria for review');
     }
