@@ -27,15 +27,16 @@ async function run() {
 }
 
 async function commentOnPullRequest(pullRequest: any) {
-  const { owner, repo } = github.context.repo;
-  const issue_number = pullRequest.number;
+  const { number } = pullRequest;
+  const owner = pullRequest.base.repo.owner.login;
+  const repo = pullRequest.base.repo.name;
 
-  console.log(`Owner: ${owner}, Repo: ${repo}, Issue Number: ${issue_number}`);
+  console.log(`Owner: ${owner}, Repo: ${repo}, Issue Number: ${number}`);
 
   await octokit.issues.createComment({
     owner,
     repo,
-    issue_number,
+    issue_number: number,
     body: "Testing a bot", 
   });
 }
