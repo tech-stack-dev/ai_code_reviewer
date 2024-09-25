@@ -1,7 +1,7 @@
 const fs = require('fs');
-const {forbiddenCommitMessages} = require('./constants');
+const { forbiddenCommitMessages } = require('./constants');
 
-const MIN_WORD_AMOUNT = 2
+const MIN_WORD_AMOUNT = 2;
 
 const validateCommitMessage = (commitMessage) => {
   const commitMessagePattern = /^.{1,60}$/;
@@ -12,7 +12,7 @@ const validateCommitMessage = (commitMessage) => {
   if (forbiddenCommitMessages.includes(commitMessage.toLowerCase())) {
     console.error(`Error: Commit message "${commitMessage}" is forbidden.
       Please avoid using generic messages such as: ${forbiddenCommitMessages.join(', ')}.`);
-    process.exit(1)
+    process.exit(1);
   }
 
   if (wordCount < MIN_WORD_AMOUNT) {
