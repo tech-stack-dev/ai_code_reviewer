@@ -1,0 +1,1 @@
+export const MANUAL_FULL_PR_REVIEW_REQUEST_COMMAND = '/review'

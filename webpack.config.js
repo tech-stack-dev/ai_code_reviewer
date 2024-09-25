@@ -10,8 +10,12 @@ module.exports = {
     libraryTarget: 'commonjs2'
   },
   resolve: {
-    extensions: ['.ts', '.js'],
-  },
+    extensions: [".ts", ".js"],
+    alias: {
+        process: "process/browser",
+        '@/core': path.resolve(__dirname, 'src/core'),
+    }
+},
   module: {
     rules: [
       {
