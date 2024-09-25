@@ -30,7 +30,6 @@ async function run() {
     } else {
       console.log('Event does not meet criteria for review');
     }
-    await reviewPullRequest(payload.issue);
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message);
