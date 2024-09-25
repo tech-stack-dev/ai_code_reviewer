@@ -3,7 +3,7 @@ name: Tagging Workflow
 on:
   push:
     branches:
-      - '**'  
+      - '**'
 
 jobs:
   tag:
@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Git
         run: |
@@ -20,12 +20,10 @@ jobs:
 
       - name: Create tag
         run: |
-          BRANCH_NAME=${GITHUB_REF##*/}
+          BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})
           TAG="tech-stack-dev/ai_code_reviewer@"
 
-          if [[ "$BRANCH_NAME" == "main" ]]; then
-            TAG+="v1.1.1"  # Adjust version as needed
-          elif [[ "$BRANCH_NAME" == "staging" ]]; then
+          if [[ "$BRANCH_NAME" == "staging" ]]; then
             TAG+="staging"
           elif [[ "$BRANCH_NAME" == "integration" ]]; then
             TAG+="integration"
@@ -43,6 +41,7 @@ jobs:
           echo "Creating tag: $TAG"
           git tag $TAG
           git push origin $TAG
+
 
       - name: Notify success
         run: echo "Tag $TAG created successfully."
