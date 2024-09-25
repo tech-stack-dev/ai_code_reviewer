@@ -16,7 +16,9 @@ const validateCommitMessage = (commitMessage) => {
   }
 
   if (wordCount < MIN_WORD_AMOUNT) {
-    console.error(`Error: Commit message "${commitMessage}" must contain at least ${MIN_WORD_AMOUNT} words.`);
+    console.error(
+      `Error: Commit message "${commitMessage}" must contain at least ${MIN_WORD_AMOUNT} words.`,
+    );
     process.exit(1);
   }
 
@@ -27,7 +29,9 @@ const validateCommitMessage = (commitMessage) => {
   }
 
   if (!formatPattern.test(commitMessage)) {
-    console.error(`Error: Commit message "${commitMessage}" must follow the format "type: subject".`);
+    console.error(
+      `Error: Commit message "${commitMessage}" must follow the format "type: subject".`,
+    );
     process.exit(1);
   }
 
