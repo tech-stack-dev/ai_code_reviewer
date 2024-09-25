@@ -1,27 +1,34 @@
 import { Octokit } from '@octokit/rest';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { MANUAL_FULL_PR_REVIEW_REQUEST_COMMAND } from '@/core';
 
 const githubToken = core.getInput('github_token');
 const autoTrigger = core.getInput('auto_trigger').toLowerCase() === 'true';
 const octokit = new Octokit({ auth: githubToken });
+
+const MANUAL_FULL_PR_REVIEW_REQUEST_COMMAND = '/review';
 
 async function run() {
   try {
     const context = github.context;
     const payload = context.payload;
 
-    if (payload.pull_request) {
-      if (autoTrigger || context.eventName === 'pull_request') {
-        await reviewPullRequest(payload.pull_request);
-      }
-    } else if (payload.issue && payload.comment) {
-      if (payload.comment.body.trim().toLowerCase() === MANUAL_FULL_PR_REVIEW_REQUEST_COMMAND) {
+    console.log('Event name:', context.eventName);
+    console.log('Action:', payload.action);
+    console.log('Auto-trigger:', autoTrigger);
+
+    if (context.eventName === 'pull_request' && autoTrigger) {
+      console.log('Triggering auto review for pull request');
+      await reviewPullRequest(payload.pull_request);
+    } else if (context.eventName === 'issue_comment' && payload.issue?.pull_request) {
+      if (payload.comment?.body.trim().toLowerCase() === MANUAL_FULL_PR_REVIEW_REQUEST_COMMAND) {
+        console.log('Triggering manual review for pull request');
         await reviewPullRequest(payload.issue);
+      } else {
+        console.log('Comment does not match review command');
       }
     } else {
-      core.setFailed('This action only works on pull requests and issue comments.');
+      console.log('Event does not meet criteria for review');
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -37,6 +44,8 @@ async function reviewPullRequest(pullRequest: any) {
   const owner = pullRequest.base.repo.owner.login;
   const repo = pullRequest.base.repo.name;
 
+  console.log(`Reviewing PR #${number} in ${owner}/${repo}`);
+
   const reviewComment = "AI review: This is a placeholder for the AI-generated review.";
 
   await octokit.issues.createComment({
@@ -45,6 +54,8 @@ async function reviewPullRequest(pullRequest: any) {
     issue_number: number,
     body: reviewComment, 
   });
+
+  console.log('Review comment posted successfully');
 }
 
 run();
