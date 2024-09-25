@@ -7,9 +7,16 @@
     "format": "prettier --write ."
   },
   "lint-staged": {
-    "*.js": "eslint --fix",
-    "*.ts": "eslint --fix",
-    "*.{js,ts}": "prettier --write"
+    "lint-staged": {
+      "*.js": [
+        "eslint --fix",
+        "prettier --write"
+      ],
+      "*.ts": [
+        "eslint --fix",
+        "prettier --write"
+      ]
+    }
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
