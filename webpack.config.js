@@ -1,20 +1,20 @@
 const path = require('path');
 
 module.exports = {
-  mode: 'production', 
+  mode: 'production',
   entry: './src/main.ts',
-  target: 'node', 
+  target: 'node',
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'), 
-    libraryTarget: 'commonjs2'
+    path: path.resolve(__dirname, 'dist'),
+    libraryTarget: 'commonjs2',
   },
   resolve: {
-    extensions: [".ts", ".js"],
+    extensions: ['.ts', '.js'],
     alias: {
-        process: "process/browser",
-    }
-},
+      process: 'process/browser',
+    },
+  },
   module: {
     rules: [
       {
