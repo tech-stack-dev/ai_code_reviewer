@@ -1,0 +1,52 @@
+name: Tagging Workflow
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: |
+          git config --local user.name "GitHub Action"
+          git config --local user.email "action@github.com"
+
+      - name: Create or update tag
+        run: |
+          BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})
+          TAG="tag-"
+
+          if [[ "$BRANCH_NAME" == "staging" ]]; then
+            TAG+="staging"
+          elif [[ "$BRANCH_NAME" == "integration" ]]; then
+            TAG+="integration"
+          elif [[ "$BRANCH_NAME" == feature/* ]]; then
+            TAG+="feature/${BRANCH_NAME#feature/}"
+          elif [[ "$BRANCH_NAME" == bug/* ]]; then
+            TAG+="bug/${BRANCH_NAME#bug/}"
+          elif [[ "$BRANCH_NAME" == hotfix/* ]]; then
+            TAG+="hotfix/${BRANCH_NAME#hotfix/}"
+          else
+            echo "No tag created for branch: $BRANCH_NAME"
+            exit 0
+          fi
+
+          echo "Checking if tag $TAG exists on remote"
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
+            echo "Tag $TAG exists on remote. Deleting..."
+            git push origin :refs/tags/$TAG  # Delete the existing tag from the remote
+          fi
+
+          echo "Creating new tag: $TAG"
+          git tag $TAG
+          git push origin $TAG  # Push the new tag to the remote
+
+      - name: Notify success
+        run: echo "Tag $TAG created successfully."

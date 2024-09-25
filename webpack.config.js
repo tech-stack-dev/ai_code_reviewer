@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   entry: './src/main.ts',
   target: 'node',
   output: {
@@ -21,6 +21,7 @@ module.exports = {
         test: /\.ts$/,
         use: 'ts-loader',
         exclude: /node_modules/,
+        include: [path.resolve(__dirname, 'src')],
       },
     ],
   },
