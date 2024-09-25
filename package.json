@@ -2,7 +2,8 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "prepare": "husky install",
+    "prepare": "husky",
+    "validate-commit-message": "node scripts/validate-commit-message.js",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
