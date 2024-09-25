@@ -1,0 +1,48 @@
+name: Tagging Workflow
+
+on:
+  push:
+    branches:
+      - '**'  
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config --local user.name "GitHub Action"
+          git config --local user.email "action@github.com"
+
+      - name: Create tag
+        run: |
+          BRANCH_NAME=${GITHUB_REF##*/}
+          TAG="tech-stack-dev/ai_code_reviewer@"
+
+          if [[ "$BRANCH_NAME" == "main" ]]; then
+            TAG+="v1.1.1"  # Adjust version as needed
+          elif [[ "$BRANCH_NAME" == "staging" ]]; then
+            TAG+="staging"
+          elif [[ "$BRANCH_NAME" == "integration" ]]; then
+            TAG+="integration"
+          elif [[ "$BRANCH_NAME" == feature/* ]]; then
+            TAG+="feature/${BRANCH_NAME#feature/}"
+          elif [[ "$BRANCH_NAME" == bug/* ]]; then
+            TAG+="bug/${BRANCH_NAME#bug/}"
+          elif [[ "$BRANCH_NAME" == hotfix/* ]]; then
+            TAG+="hotfix/${BRANCH_NAME#hotfix/}"
+          else
+            echo "No tag created for branch: $BRANCH_NAME"
+            exit 0
+          fi
+
+          echo "Creating tag: $TAG"
+          git tag $TAG
+          git push origin $TAG
+
+      - name: Notify success
+        run: echo "Tag $TAG created successfully."
