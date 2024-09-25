@@ -1,9 +1,33 @@
 {
-  "devDependencies": {
-    "husky": "^8.0.3"
-  },
   "scripts": {
-    "prepare": "husky install",
-    "validate-commit-message": "node scripts/validate-commit-message.js"
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "prepare": "husky",
+    "validate-commit-message": "node scripts/validate-commit-message.js",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "^22.6.1",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
+    "eslint": "^8.42.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-define-config": "^2.1.0",
+    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "ts-loader": "^9.5.1",
+    "typescript": "5.0.x",
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
+    "@octokit/rest": "^21.0.2"
   }
 }

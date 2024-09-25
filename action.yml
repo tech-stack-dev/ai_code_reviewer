@@ -1,0 +1,14 @@
+name: AI Code Reviewer
+description: An action to review code in pull requests using AI.
+inputs:
+  github_token:
+    description: 'GitHub Token to access the API'
+    required: true
+  auto_trigger:
+    description: 'Automatically trigger review on PR creation'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'node20'
+  main: 'dist/bundle.js'

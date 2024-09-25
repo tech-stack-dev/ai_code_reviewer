@@ -8,8 +8,5 @@
 # Dependency directories
 node_modules
 
-# Compiled output directories
-dist
-
 # Secret files
 .env
