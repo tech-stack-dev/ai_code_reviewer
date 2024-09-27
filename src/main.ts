@@ -81,6 +81,8 @@ async function reviewPullRequest(
         instructions: defaultAssistantPrompt,
         model: 'gpt-4o-mini',
         tools: [{ type: 'file_search' }],
+        temperature: 0.3,
+        top_p: 0.2
       });
 
       console.log('Creating a thread...');
