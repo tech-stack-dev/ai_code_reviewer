@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import { OpenAI } from 'openai';
 
 import { defaultAssistantPrompt, diffsReviewPrompts } from './prompts';
+import { reviewConfig } from './config/review-config';
 
 const githubToken = core.getInput('github_token');
 const openaiApiKey = core.getInput('openai_api_key');
@@ -82,46 +83,54 @@ async function reviewPullRequest(
         model: 'gpt-4o-mini',
         tools: [{ type: 'file_search' }],
         temperature: 0.3,
-        top_p: 0.2
+        top_p: 0.2,
       });
 
       console.log('Creating a thread...');
       const thread = await openai.beta.threads.create();
 
       console.log('Adding a message to the thread...');
-      await openai.beta.threads.messages.create(thread.id, {
-        role: 'user',
-        content: diffsReviewPrompts(diffString),
-        attachments: [{ file_id: file.id, tools: [{ type: 'file_search' }] }],
-      });
+      await Promise.all(
+        Object.keys(reviewConfig).map((config) => {
+          const typedConfig = config as keyof typeof reviewConfig; 
 
-      console.log('Running the assistant...');
+          return openai.beta.threads.messages.create(thread.id, {
+            role: 'user',
+            content: diffsReviewPrompts(diffString, typedConfig),
+            attachments: [{ file_id: file.id, tools: [{ type: 'file_search' }] }],
+          });
+        }))
+
+
+      console.log('Waiting for assistant to complete all responses...');
       const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
         assistant_id: assistant.id,
       });
 
-      console.log('Waiting for the assistant to complete...');
-      const messages = await openai.beta.threads.messages.list(thread.id, {
-        run_id: run.id,
+      console.log('Retrieving responses from the assistant...');
+      const messagePromises = Object.keys(reviewConfig).map(() => {
+        return openai.beta.threads.messages.list(thread.id, { run_id: run.id });
       });
+      
+      const messages = await Promise.all(messagePromises);
+      
+      const combinedResponse = messages.map(msg => {
+        const message = msg.data.pop()
+       if(message && message.content[0].type === 'text') {
+          return message.content[0].text.value
+       }
+      }).join('\n\n---\n\n');
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const message = messages.data.pop()!;
-      if (message.content[0].type === 'text') {
-        const { text } = message.content[0];
-
-        console.log('Posting review comment...');
-        await octokit.issues.createComment({
-          owner,
-          repo,
-          issue_number: number,
-          body: `AI Review:\n\n${text.value}`,
-        });
-      }
+      console.log('Posting combined review comment...');
+      await octokit.issues.createComment({
+        owner,
+        repo,
+        issue_number: number,
+        body: `AI Review:\n\n${combinedResponse}`,
+      });
 
       console.log('AI review posted successfully');
 
-      // Clean up
       await openai.files.del(file.id);
       await openai.beta.assistants.del(assistant.id);
     } catch (error) {
