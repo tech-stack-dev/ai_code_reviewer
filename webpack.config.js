@@ -13,6 +13,10 @@ module.exports = {
     extensions: ['.ts', '.js'],
     alias: {
       process: 'process/browser',
+      '@/config': path.resolve(__dirname, 'src/config/'),
+      '@/modules': path.resolve(__dirname, 'src/modules/'),
+      '@/core': path.resolve(__dirname, 'src/core/'),
+      '@/prompts': path.resolve(__dirname, 'src/prompts/'),
     },
   },
   module: {
