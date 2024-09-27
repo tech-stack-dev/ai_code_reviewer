@@ -1,13 +1,16 @@
-import { reviewConfig } from "../config/review-config";
+import { reviewConfig } from '../config/review-config';
 
-export const diffsReviewPrompts = (diffs: string, issueType: keyof typeof reviewConfig): string => {
-    const selectedConfig = reviewConfig[issueType];
+export const diffsReviewPrompts = (
+  diffs: string,
+  issueType: keyof typeof reviewConfig,
+): string => {
+  const selectedConfig = reviewConfig[issueType];
 
-    const formattedPoints = selectedConfig.points
-      .map((point, index) => (index % 2 === 0 ? `- **${point}:**` : point))
-      .join('\n');
-    
-    return `
+  const formattedPoints = selectedConfig.points
+    .map((point, index) => (index % 2 === 0 ? `- **${point}:**` : point))
+    .join('\n');
+
+  return `
 ## Context 
 You are reviewing code changes in the context of our existing codebase and project guidelines. 
 Aim for a constructive and collaborative tone in your feedback.
@@ -21,6 +24,8 @@ Review the provided code changes (diffs) and identify significant problems or ar
 You will review the code changes provided (in diff format) and leave specific, actionable comments where necessary. The focus areas include:
 
 Important: Consider the impact of these changes on the entire system. Use the repository context provided to you for a more comprehensive review. If you identify issues that affect the broader system or conflict with existing code, highlight these concerns and suggest appropriate fixes.
+
+Please focus solely on the points outlined in the Prioritization Category section. Avoid commenting on anything unrelated to those points.
 
 ## 1. Prioritization Category: ${selectedConfig.title}
 
@@ -65,6 +70,7 @@ Provide detailed review comments in Markdown format. Each comment should:
 Reference specific line numbers within the newly added or modified code.
 Focus on a single issue or suggestion.
 Include code examples or corrections where appropriate.
+Please refrain from adding suggestions for feature implementation and focus solely on the provided code.
 
 ## Output Format
 
@@ -144,5 +150,5 @@ Please review the above changes according to the guidelines provided.
 
 ${diffs}
 
-`
+`;
 };

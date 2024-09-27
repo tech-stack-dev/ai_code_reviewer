@@ -5,8 +5,8 @@ import { Octokit } from '@octokit/rest';
 import * as fs from 'fs';
 import { OpenAI } from 'openai';
 
-import { defaultAssistantPrompt, diffsReviewPrompts } from './prompts';
 import { reviewConfig } from './config/review-config';
+import { defaultAssistantPrompt, diffsReviewPrompts } from './prompts';
 
 const githubToken = core.getInput('github_token');
 const openaiApiKey = core.getInput('openai_api_key');
@@ -82,44 +82,40 @@ async function reviewPullRequest(
         instructions: defaultAssistantPrompt,
         model: 'gpt-4o-mini',
         tools: [{ type: 'file_search' }],
-        temperature: 0.3,
-        top_p: 0.2,
       });
 
       console.log('Creating a thread...');
       const thread = await openai.beta.threads.create();
 
-      console.log('Adding a message to the thread...');
-      await Promise.all(
-        Object.keys(reviewConfig).map((config) => {
-          const typedConfig = config as keyof typeof reviewConfig; 
+      const responses: string[] = [];
 
-          return openai.beta.threads.messages.create(thread.id, {
-            role: 'user',
-            content: diffsReviewPrompts(diffString, typedConfig),
-            attachments: [{ file_id: file.id, tools: [{ type: 'file_search' }] }],
-          });
-        }))
+      for (const config of Object.keys(reviewConfig)) {
+        const typedConfig = config as keyof typeof reviewConfig;
 
+        console.log(`Adding message for config: ${typedConfig}`);
+        await openai.beta.threads.messages.create(thread.id, {
+          role: 'user',
+          content: diffsReviewPrompts(diffString, typedConfig),
+          attachments: [{ file_id: file.id, tools: [{ type: 'file_search' }] }],
+        });
 
-      console.log('Waiting for assistant to complete all responses...');
-      const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
-        assistant_id: assistant.id,
-      });
+        console.log('Waiting for assistant to complete response...');
+        const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+          assistant_id: assistant.id,
+        });
 
-      console.log('Retrieving responses from the assistant...');
-      const messagePromises = Object.keys(reviewConfig).map(() => {
-        return openai.beta.threads.messages.list(thread.id, { run_id: run.id });
-      });
-      
-      const messages = await Promise.all(messagePromises);
-      
-      const combinedResponse = messages.map(msg => {
-        const message = msg.data.pop()
-       if(message && message.content[0].type === 'text') {
-          return message.content[0].text.value
-       }
-      }).join('\n\n---\n\n');
+        console.log('Retrieving response from the assistant...');
+        const messages = await openai.beta.threads.messages.list(thread.id, {
+          run_id: run.id,
+        });
+
+        const message = messages.data.pop();
+        if (message && message.content[0].type === 'text') {
+          responses.push(message.content[0].text.value);
+        }
+      }
+
+      const combinedResponse = responses.join('\n\n---\n\n');
 
       console.log('Posting combined review comment...');
       await octokit.issues.createComment({
