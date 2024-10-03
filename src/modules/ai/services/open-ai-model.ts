@@ -55,6 +55,7 @@ export class OpenAIModel implements AIModel {
         mentionedIssues,
         config,
       );
+      
       const responseText = await this.getAssistantResponse(
         thread.id,
         file.id,

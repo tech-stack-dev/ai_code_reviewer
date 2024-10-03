@@ -5,8 +5,9 @@ import { WebhookPayload } from '@actions/github/lib/interfaces';
 import { Octokit } from '@octokit/rest';
 import * as fs from 'fs';
 
-import { CurrentContextVCS, VCS } from '../interfaces';
 import { DiffFile } from '@/types';
+
+import { CurrentContextVCS, VCS } from '../interfaces';
 
 const githubToken = core.getInput('github_token');
 
@@ -34,8 +35,7 @@ export class GitHubVCS implements VCS {
     };
   }
 
-  async getDiffFiles(): Promise<DiffFile[] | undefined
-  > {
+  async getDiffFiles(): Promise<DiffFile[] | undefined> {
     if (this.pullRequest) {
       const { number } = this.pullRequest;
       const owner = this.pullRequest.base.repo.owner.login;
