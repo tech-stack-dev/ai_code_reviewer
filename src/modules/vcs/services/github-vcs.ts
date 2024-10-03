@@ -37,7 +37,10 @@ export class GitHubVCS implements VCS {
 
   async getDiffFiles(): Promise<DiffFile[] | undefined> {
     if (this.pullRequest) {
-      const { number, base: { repo } } = this.pullRequest;
+      const {
+        number,
+        base: { repo },
+      } = this.pullRequest;
       const owner = repo.owner.login;
       const repoName = repo.name;
 
@@ -60,22 +63,25 @@ export class GitHubVCS implements VCS {
 
     const diffsAndFullFiles = await Promise.all(
       changedFiles.map(async (file) => {
-        if(this.pullRequest){
-          const { base: { repo } } = this.pullRequest;
+        if (this.pullRequest) {
+          const {
+            base: { repo },
+          } = this.pullRequest;
           const owner = repo.owner.login;
           const repoName = repo.name;
-  
+
           if (file.status === 'added') {
             return `File: ${file.filename}\n\nContent (new file):\n${file.patch}`;
-          } else if (file.status === 'modified' && owner && repo) {
+          } else if (file.status === 'modified' && owner && repoName) {
             const fileContentResponse = await this.octokit.repos.getContent({
               owner,
               repo: repoName,
               path: file.filename,
               mediaType: { format: 'raw' },
             });
-  
-            const fullFileContent = fileContentResponse.data as unknown as string;
+
+            const fullFileContent =
+              fileContentResponse.data as unknown as string;
             return `File: ${file.filename}\n\nDiff:\n${file.patch}\n\nFull content:\n${fullFileContent}`;
           }
         }
@@ -90,37 +96,39 @@ export class GitHubVCS implements VCS {
     txtStream: fs.WriteStream,
   ): Promise<void> {
     try {
-      if(this.pullRequest){
-        const { base: { repo } } = this.pullRequest;
+      if (this.pullRequest) {
+        const {
+          base: { repo },
+        } = this.pullRequest;
         const owner = repo.owner.login;
         const repoName = repo.name;
 
-      const response = await this.octokit.repos.getContent({
-        owner,
-        repo: repoName,
-        path,
-      });
+        const response = await this.octokit.repos.getContent({
+          owner,
+          repo: repoName,
+          path,
+        });
 
-      if (Array.isArray(response.data)) {
-        for (const item of response.data) {
-          if (item.type === 'dir') {
-            await this.fetchRepositoryContent(item.path, txtStream);
-          } else if (item.type === 'file') {
-            const fileContentResponse = await this.octokit.repos.getContent({
-              owner,
-              repo,
-              path: item.path,
-              mediaType: {
-                format: 'raw',
-              },
-            });
+        if (Array.isArray(response.data)) {
+          for (const item of response.data) {
+            if (item.type === 'dir') {
+              await this.fetchRepositoryContent(item.path, txtStream);
+            } else if (item.type === 'file') {
+              const fileContentResponse = await this.octokit.repos.getContent({
+                owner,
+                repo: repoName,
+                path: item.path,
+                mediaType: {
+                  format: 'raw',
+                },
+              });
 
-            txtStream.write(
-              `\n\nFile: ${item.path}\n\n${fileContentResponse.data}\n`,
-            );
+              txtStream.write(
+                `\n\nFile: ${item.path}\n\n${fileContentResponse.data}\n`,
+              );
+            }
           }
         }
-      }
       }
     } catch (error) {
       console.error(
@@ -143,11 +151,13 @@ export class GitHubVCS implements VCS {
   }
 
   async postComment(comment: string): Promise<void> {
-    if(this.pullRequest){
-      const { base: { repo } } = this.pullRequest;
+    if (this.pullRequest) {
+      const {
+        base: { repo },
+      } = this.pullRequest;
       const owner = repo.owner.login;
       const repoName = repo.name;
-  
+
       await this.octokit.issues.createComment({
         owner,
         repo: repoName,
