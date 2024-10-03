@@ -72,7 +72,7 @@ export class OpenAIModel implements AIModel {
       file: fs.createReadStream(repoFileName),
       purpose: 'assistants',
     });
-    
+
     return file.id;
   }
 

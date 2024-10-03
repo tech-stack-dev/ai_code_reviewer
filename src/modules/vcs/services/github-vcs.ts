@@ -37,15 +37,15 @@ export class GitHubVCS implements VCS {
 
   async getDiffFiles(): Promise<DiffFile[] | undefined> {
     if (this.pullRequest) {
-      const { number } = this.pullRequest;
-      const owner = this.pullRequest.base.repo.owner.login;
-      const repo = this.pullRequest.base.repo.name;
+      const { number, base: { repo } } = this.pullRequest;
+      const owner = repo.owner.login;
+      const repoName = repo.name;
 
       const diffResponse = await this.octokit.request(
         `GET /repos/{owner}/{repo}/pulls/{pull_number}/files`,
         {
           owner,
-          repo,
+          repo: repoName,
           pull_number: number,
         },
       );
@@ -60,21 +60,24 @@ export class GitHubVCS implements VCS {
 
     const diffsAndFullFiles = await Promise.all(
       changedFiles.map(async (file) => {
-        const owner = this.pullRequest?.base.repo.owner.login;
-        const repo = this.pullRequest?.base.repo.name;
-
-        if (file.status === 'added') {
-          return `File: ${file.filename}\n\nContent (new file):\n${file.patch}`;
-        } else if (file.status === 'modified' && owner && repo) {
-          const fileContentResponse = await this.octokit.repos.getContent({
-            owner,
-            repo,
-            path: file.filename,
-            mediaType: { format: 'raw' },
-          });
-
-          const fullFileContent = fileContentResponse.data as unknown as string;
-          return `File: ${file.filename}\n\nDiff:\n${file.patch}\n\nFull content:\n${fullFileContent}`;
+        if(this.pullRequest){
+          const { base: { repo } } = this.pullRequest;
+          const owner = repo.owner.login;
+          const repoName = repo.name;
+  
+          if (file.status === 'added') {
+            return `File: ${file.filename}\n\nContent (new file):\n${file.patch}`;
+          } else if (file.status === 'modified' && owner && repo) {
+            const fileContentResponse = await this.octokit.repos.getContent({
+              owner,
+              repo: repoName,
+              path: file.filename,
+              mediaType: { format: 'raw' },
+            });
+  
+            const fullFileContent = fileContentResponse.data as unknown as string;
+            return `File: ${file.filename}\n\nDiff:\n${file.patch}\n\nFull content:\n${fullFileContent}`;
+          }
         }
       }),
     );
@@ -87,12 +90,14 @@ export class GitHubVCS implements VCS {
     txtStream: fs.WriteStream,
   ): Promise<void> {
     try {
-      const owner = this.pullRequest?.base.repo.owner.login;
-      const repo = this.pullRequest?.base.repo.name;
+      if(this.pullRequest){
+        const { base: { repo } } = this.pullRequest;
+        const owner = repo.owner.login;
+        const repoName = repo.name;
 
       const response = await this.octokit.repos.getContent({
         owner,
-        repo,
+        repo: repoName,
         path,
       });
 
@@ -116,6 +121,7 @@ export class GitHubVCS implements VCS {
           }
         }
       }
+      }
     } catch (error) {
       console.error(
         `Error fetching directory content for path: ${path}`,
@@ -137,14 +143,17 @@ export class GitHubVCS implements VCS {
   }
 
   async postComment(comment: string): Promise<void> {
-    const owner = this.pullRequest?.base.repo.owner.login;
-    const repo = this.pullRequest?.base.repo.name;
-
-    await this.octokit.issues.createComment({
-      owner,
-      repo,
-      issue_number: this.pullRequest?.number ?? 0,
-      body: comment,
-    });
+    if(this.pullRequest){
+      const { base: { repo } } = this.pullRequest;
+      const owner = repo.owner.login;
+      const repoName = repo.name;
+  
+      await this.octokit.issues.createComment({
+        owner,
+        repo: repoName,
+        issue_number: this.pullRequest?.number ?? 0,
+        body: comment,
+      });
+    }
   }
 }
