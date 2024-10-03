@@ -13,7 +13,6 @@ import {
   defaultAssistantPrompt,
   diffsReviewPrompts,
 } from '@/prompts';
-import { UploadedOpenAiFile } from '@/types';
 
 import { currentVCS } from '../../vcs';
 import { AIModel } from '../interfaces';
@@ -29,8 +28,55 @@ export class OpenAIModel implements AIModel {
     combinedDiffsAndFiles: string,
     repoFileName: string,
   ): Promise<string> {
-    const file = await this.uploadFile(repoFileName);
+    const fileId = await this.uploadFile(repoFileName);
+    const assistantId = await this.createAssistant();
 
+    const thread = await this.openai.beta.threads.create();
+
+    const responses: string[] = [];
+    const mentionedIssues: string[] = [];
+
+    this.openai.beta.threads.messages.create(thread.id, {
+      role: 'user',
+      content: contextAwarenessPrompt,
+      attachments: [{ file_id: fileId, tools: [{ type: 'file_search' }] }],
+    });
+
+    for (const config of Object.keys(reviewIssues)) {
+      const typedConfig = config as keyof typeof reviewIssues;
+      const currentPrompt = this.generateReviewPrompt(
+        combinedDiffsAndFiles,
+        mentionedIssues,
+        typedConfig,
+      );
+
+      await this.openai.beta.threads.messages.create(thread.id, {
+        role: 'user',
+        content: currentPrompt,
+        attachments: [{ file_id: fileId, tools: [{ type: 'file_search' }] }],
+      });
+
+      const responseText = await this.getResponseText(thread.id, assistantId);
+
+      if (responseText) {
+        responses.push(responseText);
+        mentionedIssues.push(...extractIssues(responseText));
+      }
+    }
+
+    return responses.join('\n\n---\n\n');
+  }
+
+  private async uploadFile(repoFileName: string): Promise<string> {
+    const file = await this.openai.files.create({
+      file: fs.createReadStream(repoFileName),
+      purpose: 'assistants',
+    });
+    
+    return file.id;
+  }
+
+  private async createAssistant(): Promise<string> {
     const assistant = await this.openai.beta.assistants.create({
       name: 'PR Reviewer',
       instructions: defaultAssistantPrompt,
@@ -39,70 +85,13 @@ export class OpenAIModel implements AIModel {
       temperature: ASSISTANT_TEMPERATURE,
       top_p: ASSISTANT_TOP_P,
     });
-
-    const thread = await this.openai.beta.threads.create();
-
-    await this.sendContextAwarenessPrompt(thread.id, file.id);
-
-    const responses: string[] = [];
-    const mentionedIssues: string[] = [];
-
-    for (const config of Object.keys(reviewIssues) as Array<
-      keyof typeof reviewIssues
-    >) {
-      const reviewPrompt = this.generateReviewPrompt(
-        combinedDiffsAndFiles,
-        mentionedIssues,
-        config,
-      );
-      
-      const responseText = await this.getAssistantResponse(
-        thread.id,
-        file.id,
-        assistant.id,
-        reviewPrompt,
-      );
-
-      if (responseText) {
-        responses.push(responseText);
-        const newIssues = extractIssues(responseText);
-        mentionedIssues.push(...newIssues);
-      }
-    }
-
-    return responses.join('\n\n---\n\n');
+    return assistant.id;
   }
 
-  private async uploadFile(fileName: string): Promise<UploadedOpenAiFile> {
-    return this.openai.files.create({
-      file: fs.createReadStream(fileName),
-      purpose: 'assistants',
-    });
-  }
-
-  private async sendContextAwarenessPrompt(
+  private async getResponseText(
     threadId: string,
-    fileId: string,
-  ): Promise<void> {
-    await this.openai.beta.threads.messages.create(threadId, {
-      role: 'user',
-      content: contextAwarenessPrompt,
-      attachments: [{ file_id: fileId, tools: [{ type: 'file_search' }] }],
-    });
-  }
-
-  private async getAssistantResponse(
-    threadId: string,
-    fileId: string,
     assistantId: string,
-    prompt: string,
   ): Promise<string | null> {
-    await this.openai.beta.threads.messages.create(threadId, {
-      role: 'user',
-      content: prompt,
-      attachments: [{ file_id: fileId, tools: [{ type: 'file_search' }] }],
-    });
-
     const run = await this.openai.beta.threads.runs.createAndPoll(threadId, {
       assistant_id: assistantId,
     });
@@ -112,7 +101,7 @@ export class OpenAIModel implements AIModel {
     });
 
     const message = messages.data.pop();
-    return message?.content[0].type === 'text'
+    return message && message.content[0].type === 'text'
       ? message.content[0].text.value
       : null;
   }
