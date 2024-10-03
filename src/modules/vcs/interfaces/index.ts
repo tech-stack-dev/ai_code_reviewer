@@ -16,7 +16,6 @@ export interface CurrentContextVCS {
 
 export interface VCS {
   getCurrentContext(): Promise<CurrentContextVCS>;
-  getReviewRequestData(prId: number): Promise<ReviewRequestData>;
   getDiffFiles(prId: number): Promise<DiffFile[] | undefined>;
   postComment(comment: string): Promise<void>;
   getDiffsAndFullFilesContent(): Promise<string | undefined>;
