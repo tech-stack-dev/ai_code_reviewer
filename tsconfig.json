@@ -13,7 +13,11 @@
       "@/core": ["./src/core/index.ts"],
       "@/core/*": ["./src/core/*"],
       "@/prompts": ["./src/prompts/index.ts"],
-      "@/prompts/*": ["./src/prompts/*"]
+      "@/prompts/*": ["./src/prompts/*"],
+      "@/helpers": ["./src/helpers/index.ts"],
+      "@/helpers/*": ["./src/helpers/*"],
+      "@/types": ["./src/types/index.ts"],
+      "@/types/*": ["./src/types/*"]
     },
     "strict": true,
     "esModuleInterop": true,

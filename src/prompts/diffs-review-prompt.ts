@@ -1,11 +1,11 @@
-import { reviewConfig } from '../config/review-config';
+import { reviewIssues } from '@/helpers';
 
 export const diffsReviewPrompts = (
   diffs: string,
-  issueType: keyof typeof reviewConfig,
+  issueType: keyof typeof reviewIssues,
   addressedIssues: string,
 ): string => {
-  const selectedConfig = reviewConfig[issueType];
+  const selectedConfig = reviewIssues[issueType];
 
   const formattedPoints = selectedConfig.points
     .map((point, index) => (index % 2 === 0 ? `- **${point}:**` : point))

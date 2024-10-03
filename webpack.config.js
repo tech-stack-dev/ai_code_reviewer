@@ -17,6 +17,8 @@ module.exports = {
       '@/modules': path.resolve(__dirname, 'src/modules/'),
       '@/core': path.resolve(__dirname, 'src/core/'),
       '@/prompts': path.resolve(__dirname, 'src/prompts/'),
+      '@/helpers': path.resolve(__dirname, 'src/helpers/'),
+      '@/types': path.resolve(__dirname, 'src/types/'),
     },
   },
   module: {

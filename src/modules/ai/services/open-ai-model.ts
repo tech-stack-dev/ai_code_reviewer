@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { OpenAI } from 'openai';
 
-import { reviewConfig } from '@/config/review-config';
 import {
   contextAwarenessPrompt,
   defaultAssistantPrompt,
@@ -10,6 +9,8 @@ import {
 
 import { currentVCS } from '../../vcs';
 import { AIModel } from '../interfaces';
+import { ASSISTANT_MODEL, ASSISTANT_TEMPERATURE, ASSISTANT_TOP_P, extractIssues, reviewIssues } from '@/helpers';
+import { UploadedOpenAiFile } from '@/types';
 
 export class OpenAIModel implements AIModel {
   private openai: OpenAI;
@@ -22,116 +23,76 @@ export class OpenAIModel implements AIModel {
     combinedDiffsAndFiles: string,
     repoFileName: string,
   ): Promise<string> {
-    const file = await this.openai.files.create({
-      file: fs.createReadStream(repoFileName),
-      purpose: 'assistants',
-    });
-
-    console.log('Creating an assistant...');
+    const file = await this.uploadFile(repoFileName);
+    
     const assistant = await this.openai.beta.assistants.create({
       name: 'PR Reviewer',
       instructions: defaultAssistantPrompt,
-      model: 'gpt-4o-mini',
+      model: ASSISTANT_MODEL,
       tools: [{ type: 'file_search' }],
-      temperature: 0.5,
-      top_p: 0.6,
+      temperature: ASSISTANT_TEMPERATURE,
+      top_p: ASSISTANT_TOP_P,
     });
 
-    console.log('Creating a thread...');
     const thread = await this.openai.beta.threads.create();
+
+    await this.sendContextAwarenessPrompt(thread.id, file.id);
 
     const responses: string[] = [];
     const mentionedIssues: string[] = [];
 
-    await this.openai.beta.threads.messages.create(thread.id, {
-      role: 'user',
-      content: contextAwarenessPrompt,
-      attachments: [{ file_id: file.id, tools: [{ type: 'file_search' }] }],
-    });
+    for (const config of Object.keys(reviewIssues) as Array<keyof typeof reviewIssues>) {
+      const reviewPrompt = this.generateReviewPrompt(combinedDiffsAndFiles, mentionedIssues, config);
+      const responseText = await this.getAssistantResponse(thread.id, file.id, assistant.id, reviewPrompt);
 
-    const run = await this.openai.beta.threads.runs.createAndPoll(thread.id, {
-      assistant_id: assistant.id,
-    });
-
-    console.log('Retrieving response from the assistant...');
-    const messages = await this.openai.beta.threads.messages.list(thread.id, {
-      run_id: run.id,
-    });
-
-    const message = messages.data.pop();
-    if (message && message.content[0].type === 'text') {
-      // const responseText = message.content[0].text.value;
-      // responses.push(responseText);
-    }
-
-    for (const config of Object.keys(reviewConfig)) {
-      const typedConfig = config as keyof typeof reviewConfig;
-      let currentPrompt = this.generateReviewPrompt(
-        combinedDiffsAndFiles,
-        mentionedIssues,
-        typedConfig,
-      );
-
-      console.log(`Reviewing for ${reviewConfig[typedConfig].title}`);
-      await this.openai.beta.threads.messages.create(thread.id, {
-        role: 'user',
-        content: currentPrompt,
-        attachments: [{ file_id: file.id, tools: [{ type: 'file_search' }] }],
-      });
-
-      console.log('Waiting for assistant to complete response...');
-      const run = await this.openai.beta.threads.runs.createAndPoll(thread.id, {
-        assistant_id: assistant.id,
-      });
-
-      console.log('Retrieving response from the assistant...');
-      const messages = await this.openai.beta.threads.messages.list(thread.id, {
-        run_id: run.id,
-      });
-
-      const message = messages.data.pop();
-      if (message && message.content[0].type === 'text') {
-        const responseText = message.content[0].text.value;
+      if (responseText) {
         responses.push(responseText);
-
-        const newIssues = this.extractIssues(responseText);
+        const newIssues = extractIssues(responseText);
         mentionedIssues.push(...newIssues);
-
-        console.log(mentionedIssues);
-
-        currentPrompt = this.generateReviewPrompt(
-          combinedDiffsAndFiles,
-          mentionedIssues,
-          typedConfig,
-        );
       }
     }
 
     return responses.join('\n\n---\n\n');
   }
 
-  extractIssues(responseText: string): string[] {
-    const issues: string[] = [];
+  private async uploadFile(fileName: string): Promise<UploadedOpenAiFile> {
+    return this.openai.files.create({
+      file: fs.createReadStream(fileName),
+      purpose: 'assistants',
+    });
+  }
 
-    const issueRegex = /(?:###\s*)?Comment on lines (\d+)-(\d+)\s*\n([\s\S]+?)(?=\n\s*###|$)/g;
+  private async sendContextAwarenessPrompt(threadId: string, fileId: string): Promise<void> {
+    await this.openai.beta.threads.messages.create(threadId, {
+      role: 'user',
+      content: contextAwarenessPrompt,
+      attachments: [{ file_id: fileId, tools: [{ type: 'file_search' }] }],
+    });
+  }
 
-    let match;
-    while ((match = issueRegex.exec(responseText)) !== null) {
-      const startLine = match[1];
-      const endLine = match[2];
-      const issueDescription = match[3].trim();
+  private async getAssistantResponse(threadId: string, fileId: string, assistantId: string, prompt: string): Promise<string | null> {
+    await this.openai.beta.threads.messages.create(threadId, {
+      role: 'user',
+      content: prompt,
+      attachments: [{ file_id: fileId, tools: [{ type: 'file_search' }] }],
+    });
 
-      const formattedIssue = `Lines ${startLine}-${endLine}: ${issueDescription}`;
-      issues.push(formattedIssue);
-    }
+    const run = await this.openai.beta.threads.runs.createAndPoll(threadId, {
+      assistant_id: assistantId,
+    });
 
-    return issues;
+    const messages = await this.openai.beta.threads.messages.list(threadId, {
+      run_id: run.id,
+    });
+
+    const message = messages.data.pop();
+    return message?.content[0].type === 'text' ? message.content[0].text.value : null;
   }
 
   generateReviewPrompt(
     diffs: string,
     mentionedIssues: string[],
-    issueType: keyof typeof reviewConfig,
+    issueType: keyof typeof reviewIssues,
   ): string {
     const mentionedIssuesText = mentionedIssues.length
       ? `\n\nThe following issues have already been addressed in previous review categories. DO NOT mention these again: \n${mentionedIssues
