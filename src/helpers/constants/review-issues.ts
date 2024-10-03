@@ -1,16 +1,16 @@
 export const reviewIssues = {
-    criticalIssues: {
-      title: 'Tier 1: Critical Issues',
-      points: [
-        'Code contains security vulnerabilities (e.g., SQL injection, XSS).',
-        'Important functionality is broken or not working as intended.',
-        'Code introduces performance bottlenecks (e.g., excessive loops or heavy computations).',
-        'Inadequate error handling for critical operations.',
-        'Dependencies are outdated or vulnerable (requires immediate upgrade).',
-        'Missing required documentation for core functionalities or APIs.',
-        'Violation of coding standards that could lead to major issues.',
-      ],
-      responseExample: `
+  criticalIssues: {
+    title: 'Tier 1: Critical Issues',
+    points: [
+      'Code contains security vulnerabilities (e.g., SQL injection, XSS).',
+      'Important functionality is broken or not working as intended.',
+      'Code introduces performance bottlenecks (e.g., excessive loops or heavy computations).',
+      'Inadequate error handling for critical operations.',
+      'Dependencies are outdated or vulnerable (requires immediate upgrade).',
+      'Missing required documentation for core functionalities or APIs.',
+      'Violation of coding standards that could lead to major issues.',
+    ],
+    responseExample: `
   ### Example changes
   #### File: \`database.py\`
   
@@ -47,19 +47,19 @@ export const reviewIssues = {
   \`\`\`
   
   `,
-    },
-    importantIssues: {
-      title: 'Tier 2: Important Issues',
-      points: [
-        'Code lacks unit tests or integration tests for significant components (only when it would be really helpful)',
-        'Inconsistent naming conventions or unclear variable/method names.',
-        'Code duplication across multiple files or modules.',
-        'Potential memory leaks due to unclosed resources (e.g., file streams, database connections).',
-        'Incorrect usage of asynchronous patterns (e.g., unhandled promises).',
-        'Performance issues that can be resolved with optimizations (e.g., complex queries).',
-        'Inconsistent use of error messages or lack of user feedback in the UI.',
-      ],
-      responseExample: `
+  },
+  importantIssues: {
+    title: 'Tier 2: Important Issues',
+    points: [
+      'Code lacks unit tests or integration tests for significant components (only when it would be really helpful)',
+      'Inconsistent naming conventions or unclear variable/method names.',
+      'Code duplication across multiple files or modules.',
+      'Potential memory leaks due to unclosed resources (e.g., file streams, database connections).',
+      'Incorrect usage of asynchronous patterns (e.g., unhandled promises).',
+      'Performance issues that can be resolved with optimizations (e.g., complex queries).',
+      'Inconsistent use of error messages or lack of user feedback in the UI.',
+    ],
+    responseExample: `
   ### Example changes
   #### File: \`data_processor.py\`
   
@@ -95,19 +95,19 @@ export const reviewIssues = {
   + with open(filename) as file:
   \`\`\`
       `,
-    },
-    minorImprovements: {
-      title: 'Tier 3: Minor Improvements',
-      points: [
-        'Refactoring suggestions for code clarity and maintainability.',
-        'Code style inconsistencies (e.g., spacing, indentation).',
-        'Enhancements to documentation (but only when it would be really helpful)',
-        'Recommendations for using more modern or efficient language features.',
-        'Suggestions to improve UI/UX without altering functionality.',
-        'Proposing better variable names for improved readability.',
-        'General best practices (e.g., favoring immutability, avoiding global variables).',
-      ],
-      responseExample: `
+  },
+  minorImprovements: {
+    title: 'Tier 3: Minor Improvements',
+    points: [
+      'Refactoring suggestions for code clarity and maintainability.',
+      'Code style inconsistencies (e.g., spacing, indentation).',
+      'Enhancements to documentation (but only when it would be really helpful)',
+      'Recommendations for using more modern or efficient language features.',
+      'Suggestions to improve UI/UX without altering functionality.',
+      'Proposing better variable names for improved readability.',
+      'General best practices (e.g., favoring immutability, avoiding global variables).',
+    ],
+    responseExample: `
   ### Example changes
   #### File: \`math_utils.py\`
   
@@ -140,6 +140,5 @@ export const reviewIssues = {
   + return sum(numbers)
   \`\`\`
       `,
-    },
-  };
-  
+  },
+};

@@ -1,6 +1,6 @@
 import { config } from '@/config';
+import { VCSOptions } from '@/helpers';
 
-import { VCSOptions } from './constants';
 import { VCS } from './interfaces';
 import { GitHubVCS } from './services';
 

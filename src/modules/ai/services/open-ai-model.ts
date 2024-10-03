@@ -2,15 +2,21 @@ import * as fs from 'fs';
 import { OpenAI } from 'openai';
 
 import {
+  ASSISTANT_MODEL,
+  ASSISTANT_TEMPERATURE,
+  ASSISTANT_TOP_P,
+  extractIssues,
+  reviewIssues,
+} from '@/helpers';
+import {
   contextAwarenessPrompt,
   defaultAssistantPrompt,
   diffsReviewPrompts,
 } from '@/prompts';
+import { UploadedOpenAiFile } from '@/types';
 
 import { currentVCS } from '../../vcs';
 import { AIModel } from '../interfaces';
-import { ASSISTANT_MODEL, ASSISTANT_TEMPERATURE, ASSISTANT_TOP_P, extractIssues, reviewIssues } from '@/helpers';
-import { UploadedOpenAiFile } from '@/types';
 
 export class OpenAIModel implements AIModel {
   private openai: OpenAI;
@@ -24,7 +30,7 @@ export class OpenAIModel implements AIModel {
     repoFileName: string,
   ): Promise<string> {
     const file = await this.uploadFile(repoFileName);
-    
+
     const assistant = await this.openai.beta.assistants.create({
       name: 'PR Reviewer',
       instructions: defaultAssistantPrompt,
@@ -41,9 +47,20 @@ export class OpenAIModel implements AIModel {
     const responses: string[] = [];
     const mentionedIssues: string[] = [];
 
-    for (const config of Object.keys(reviewIssues) as Array<keyof typeof reviewIssues>) {
-      const reviewPrompt = this.generateReviewPrompt(combinedDiffsAndFiles, mentionedIssues, config);
-      const responseText = await this.getAssistantResponse(thread.id, file.id, assistant.id, reviewPrompt);
+    for (const config of Object.keys(reviewIssues) as Array<
+      keyof typeof reviewIssues
+    >) {
+      const reviewPrompt = this.generateReviewPrompt(
+        combinedDiffsAndFiles,
+        mentionedIssues,
+        config,
+      );
+      const responseText = await this.getAssistantResponse(
+        thread.id,
+        file.id,
+        assistant.id,
+        reviewPrompt,
+      );
 
       if (responseText) {
         responses.push(responseText);
@@ -62,7 +79,10 @@ export class OpenAIModel implements AIModel {
     });
   }
 
-  private async sendContextAwarenessPrompt(threadId: string, fileId: string): Promise<void> {
+  private async sendContextAwarenessPrompt(
+    threadId: string,
+    fileId: string,
+  ): Promise<void> {
     await this.openai.beta.threads.messages.create(threadId, {
       role: 'user',
       content: contextAwarenessPrompt,
@@ -70,7 +90,12 @@ export class OpenAIModel implements AIModel {
     });
   }
 
-  private async getAssistantResponse(threadId: string, fileId: string, assistantId: string, prompt: string): Promise<string | null> {
+  private async getAssistantResponse(
+    threadId: string,
+    fileId: string,
+    assistantId: string,
+    prompt: string,
+  ): Promise<string | null> {
     await this.openai.beta.threads.messages.create(threadId, {
       role: 'user',
       content: prompt,
@@ -86,7 +111,9 @@ export class OpenAIModel implements AIModel {
     });
 
     const message = messages.data.pop();
-    return message?.content[0].type === 'text' ? message.content[0].text.value : null;
+    return message?.content[0].type === 'text'
+      ? message.content[0].text.value
+      : null;
   }
 
   generateReviewPrompt(

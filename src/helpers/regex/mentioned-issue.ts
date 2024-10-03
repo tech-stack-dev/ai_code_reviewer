@@ -3,7 +3,7 @@
  *
  * Matches comments in the format:
  * ### Comment on lines 1-5
- * 
+ *
  * Captures:
  * 1. Start line number
  * 2. End line number

@@ -8,14 +8,19 @@ export class ReviewManagement {
   ) {}
 
   async execute(): Promise<void> {
-    if ((await this.vcs.getCurrentContext()).isReviewRequested) {
+    const isReviewRequested = (await this.vcs.getCurrentContext())
+      .isReviewRequested;
+
+    if (isReviewRequested) {
       const combinedDiffsAndFiles =
         await this.vcs.getDiffsAndFullFilesContent();
+
       const repositoryFileName = await this.vcs.bundleRepositoryToTxt();
       const aiReview = await this.aiModel.generateReview(
         combinedDiffsAndFiles ?? '',
         repositoryFileName,
       );
+
       await this.vcs.postComment(aiReview);
     }
   }

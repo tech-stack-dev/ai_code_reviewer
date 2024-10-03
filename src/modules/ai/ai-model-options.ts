@@ -1,7 +1,7 @@
 import { config } from '@/config';
+import { AIModels } from '@/helpers';
 
 import { OpenAIModel } from './services';
-import { AIModels } from '@/helpers';
 
 const aiModelServices = Object.freeze({
   [AIModels.OPEN_AI]: new OpenAIModel(),
