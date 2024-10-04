@@ -12,7 +12,7 @@ export const reviewIssues = {
     ],
     responseExample: `
         ### Example changes
-        #### File: \`authentication.py\`:
+        #### File: authentication.py:
         \`\`\`python
         1: def authenticate_user(username, password):
         2:    query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
@@ -106,7 +106,7 @@ export const reviewIssues = {
     ],
     responseExample: `
         ### Example changes
-        #### File: \`user_service.py\`:
+        #### File: user_service.py:
         \`\`\`python
         1: class UserService:
         2:     def get_users(self):
@@ -236,7 +236,7 @@ export const reviewIssues = {
     ],
     responseExample: `
         ### Example changes
-        #### File: \`helper.py\`:
+        #### File: helper.py:
         \`\`\`python
         1: def process(d):
         2:     x = d.get('val')

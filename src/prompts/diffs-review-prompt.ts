@@ -36,8 +36,7 @@ You will receive:
 1. Code changes (diffs) with line numbers, indicating specific lines modified or added. 
 2. Original code that was replaced, if applicable. 
 3. Full file content for more context.
-
-**Important**: You should only review diffs, DO NOT leave comment on the code that is outside of diffs, use it only for context to provide better answers!
+4. Focus on commenting only on diff hunks
 
 Example: 
 ### Example changes
@@ -104,6 +103,8 @@ Comment: Description of the issue or suggestion.
    - **The start and end line numbers for each comment should be explicitly mentioned.**
    - **For single-line comments, the start and end line numbers should be identical.**
    - **For multi-line comments, indicate the start and end lines for the comment range.**
+   - **It is crucial to mention correct start and end lines so that the comment will be placed correctly in the diff hunk.**
+
 
 
 5. No Issues Found: If you find no issues within a specific diff block, respond with only this "LGTM" and nothing else.
