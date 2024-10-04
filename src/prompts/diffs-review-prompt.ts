@@ -52,7 +52,6 @@ Full file content:
 
 Diff:
 \`\`\`diff
-@@ -3,7 +3,9 @@ 
 + 	new_variable = 5 
 + 	result = new_variable * 2 
 - 	result = 0 
@@ -104,7 +103,7 @@ Comment: Description of the issue or suggestion.
    - **For single-line comments, the start and end line numbers should be identical.**
    - **For multi-line comments, indicate the start and end lines for the comment range.**
    - **It is crucial to mention correct start and end lines so that the comment will be placed correctly in the diff hunk.**
-
+   - **Verify that the start and end lines are within the diff to prevent errors later.**
 
 
 5. No Issues Found: If you find no issues within a specific diff block, respond with only this "LGTM" and nothing else.

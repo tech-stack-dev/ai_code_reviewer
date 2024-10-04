@@ -83,7 +83,7 @@ export class GitHubVCS implements VCS {
 
             const fullFileContent =
               fileContentResponse.data as unknown as string;
-            return `File: ${file.filename}\n\nDiff:\n${file.patch}\n\nFull content:\n${fullFileContent}`;
+            return `File: ${file.filename}\n\nDiff:\n${file.patch}\n\nFull File content:\n${fullFileContent}`;
           }
         }
       }),

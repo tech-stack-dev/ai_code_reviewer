@@ -33,7 +33,7 @@ export const reviewIssues = {
     
         ### Example response
         File: authentication.py
-        Start line: 1
+        Start line: 2
         End line: 3
         Comment: SQL injection risk in authentication. User input is directly interpolated into SQL query. This could allow unauthorized access to all user accounts.
     
@@ -50,7 +50,7 @@ export const reviewIssues = {
         ---
 
         File: authentication.py
-        Start line: 5
+        Start line: 7
         End line: 8
         Comment:  Multiple security issues:
         1. Storing plain-text passwords without hashing
@@ -74,8 +74,8 @@ export const reviewIssues = {
         ---
 
         File: authentication.py
-        Start line: 10
-        End line: 15
+        Start line: 12
+        End line: 16
         Comment: Exposing sensitive credit card information in logs and storing unencrypted card numbers.
 
         Suggested fix:
@@ -140,7 +140,7 @@ export const reviewIssues = {
         ### Example response
 
         File: user_service.py
-        Start line: 2
+        Start line: 3
         End line: 9
         Comment:  N+1 query problem in user fetching. Making separate database queries for each user's posts will significantly impact performance as the number of users grows.
        
@@ -167,7 +167,7 @@ export const reviewIssues = {
         ---
 
         File: user_service.py
-        Start line: 11
+        Start line: 13
         End line: 21
         Comment: Important issues with resource management and error handling:
         1. Database connection not properly closed (potential resource leak)
@@ -205,7 +205,7 @@ export const reviewIssues = {
         ---
     
         File: user_service.py
-        Start line: 23
+        Start line: 24
         End line: 27
         Comment: File handle not properly closed.
     
@@ -258,7 +258,7 @@ export const reviewIssues = {
         ### Example response
 
         File: helper.py
-        Start line: 1
+        Start line: 2
         End line: 6
         Comment: Code style and readability improvements needed:
         1. Unclear variable names
@@ -291,7 +291,7 @@ export const reviewIssues = {
         ---
 
         File: helper.py
-        Start line: 8
+        Start line: 9
         End line: 12
         Comment: Minor improvements for variable naming and use of built-in functions:
     
