@@ -14,7 +14,6 @@ export const refineIssuesPrompt = (
     Evaluate this issue against these criteria:
     1. Objectivity: Is the issue based on concrete, measurable factors rather than personal preference?
     2. Actionability: Can specific actions be taken to address this issue?
-    3. Clarity: Is the issue clearly defined and unambiguous?
 
     ## Issue Classification Guidelines
 
@@ -58,9 +57,15 @@ export const refineIssuesPrompt = (
 
 
     ## Required Response Format
-    Respond with one of:
-    - "KEEP: [specific technical justification]"
-    - "DISCARD: [specific reason for rejection]"
+    Respond with exactly one of:
+    - "KEEP: [specific technical reason with actionable details]"
+    - "DISCARD: [specific technical reason for rejection]"
+
+    IMPORTANT: 
+    - Start your response with either KEEP or DISCARD immediately
+    - No introduction or additional context
+    - No markdown formatting
+    - No greetings or conclusions
     
     ## Analysis Target
     ISSUE TO ANALYZE: ${issue}
