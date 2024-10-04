@@ -1,8 +1,8 @@
 export const refineIssuesPrompt = (
-    issue: string,
-    diffAndCombinedFile: string,
-  ): string => {
-    return `
+  issue: string,
+  diffAndCombinedFile: string,
+): string => {
+  return `
       # Code Issue Refinement Analysis
       
       ## Task Description 
@@ -97,4 +97,4 @@ export const refineIssuesPrompt = (
       RELEVANT CODE CHANGES:
       ${diffAndCombinedFile}
       `;
-  };
+};

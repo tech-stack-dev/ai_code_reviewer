@@ -43,6 +43,8 @@ export class OpenAIModel implements AIModel {
       attachments: [{ file_id: fileId, tools: [{ type: 'file_search' }] }],
     });
 
+    await this.getResponseText(thread.id, assistantId);
+
     for (const config of Object.keys(reviewIssues)) {
       const typedConfig = config as keyof typeof reviewIssues;
       const currentPrompt = this.generateReviewPrompt(
