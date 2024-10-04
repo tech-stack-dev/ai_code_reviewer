@@ -81,9 +81,19 @@ export class GitHubVCS implements VCS {
               mediaType: { format: 'raw' },
             });
 
+            console.log(`FILE PATCH: ${file.patch}`)
+
             const fullFileContent =
               fileContentResponse.data as unknown as string;
-            return `File: ${file.filename}\n\nDiff:\n${file.patch}\n\nFull File content:\n${fullFileContent}`;
+            return `
+              ### File: ${file.filename}
+
+              ### Diff (Start Line and End Line should be specified from here):
+              ${file.patch}
+              
+              ### Full File content (Should be used only for context):
+              
+              ${fullFileContent}`;
           }
         }
       }),

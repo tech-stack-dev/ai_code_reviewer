@@ -79,13 +79,15 @@ Provide detailed review comments in Markdown format. Each comment should:
 
 ### Comment on lines X-Y 
 File: path to file goes here
-Start line: X
+Start line: X 
 End line: Y
 Comment: Description of the issue or suggestion. 
 \`\`\`diff 
 - Problematic or original code 
 + Suggested correction or improvement
 \`\`\`
+
+**Important**: Make sure Start line and End line are correct and are specified within a diff!
 
 ## Review Guidelines
 
