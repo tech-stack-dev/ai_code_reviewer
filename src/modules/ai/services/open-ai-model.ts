@@ -59,6 +59,7 @@ export class OpenAIModel implements AIModel {
 
       const responseText = await this.getResponseText(thread.id, assistantId);
 
+      console.log('AI MODEL RESPONSE', responseText);
       if (responseText) {
         const refinedIssues = await this.refineIssues({
           issues: extractIssues(responseText),

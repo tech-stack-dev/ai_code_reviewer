@@ -1,77 +1,100 @@
 export const refineIssuesPrompt = (
-  issue: string,
-  diffAndCombinedFile: string,
-): string => {
-  return `
-    # Code Issue Refinement Analysis
-    
-    ## Task Description 
-
-    You will review the code changes provided (in diff format) and the issue we found in this diff and your task is to determine if it is valid and actionable:   
-
-    ## Evaluation Criteria
-
-    Evaluate this issue against these criteria:
-    1. Objectivity: Is the issue based on concrete, measurable factors rather than personal preference?
-    2. Actionability: Can specific actions be taken to address this issue?
-
-    ## Issue Classification Guidelines
-
-    ### Examples of subjective/non-actionable issues that should be DISCARDED:
-    1. Comment on lines 0-29 (new file)
-        The CarReview class could benefit from a comment explaining the purpose of the class and its attributes. This will improve maintainability and clarity for future developers.
-
-        +class CarReview:
-        +    """
-        +    Represents a review for a car in the rental system.
-        +
-        +    Attributes:
-        +        id (str): Unique identifier for the review.
-        +        comment (str): The review comment provided by the user.
-        +        rating (int): The rating given to the car, defaults to 1.
-        +        created_at (datetime): Timestamp when the review was created.
-        +        updated_at (datetime): Timestamp when the review was last updated.
-        +    """
-
-    2. Comment on lines 6-6
-        Lack of a newline at the end of the forgot_password_dto.py file may lead to issues with version control diffs and tool compatibility. Ensure to include a newline to adhere to consistent file formatting.
-
-        +
-
-    ### Examples of objective/actionable issues that should be KEPT:
-    1. Comment on lines 25-29
-        The constructor in CarsController now includes a new service, CarReviewsService, but there is no indication of how this service is initialized or its dependencies. Ensure that all dependencies are properly injected and managed to avoid runtime errors.
-
-        -    def __init__(self, cars_service: CarsService):
-        +    def __init__(self, cars_service: CarsService, reviews_service: CarReviewsService):
-
-    2. Comment on lines 88-92
-        The new endpoint for retrieving car reviews lacks validation for the car_id parameter. Implement validation to ensure that the car_id is in the expected format (e.g., UUID) to prevent potential issues during execution.
-
-        +    def get_car_reviews(self, car_id: str):
-        +        return self.reviews_service.get_reviews_for_car(car_id)
-
-    3. In the CarReview class, there is no indication of a relationship with the User class. If reviews are associated with users, consider adding a foreign key reference to the User class to maintain data integrity and enforce relationships.
-
-        +    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
-
-
-    ## Required Response Format
-    Respond with exactly one of:
-    - "KEEP: [specific technical reason with actionable details]"
-    - "DISCARD: [specific technical reason for rejection]"
-
-    IMPORTANT: 
-    - Start your response with either KEEP or DISCARD immediately
-    - No introduction or additional context
-    - No markdown formatting
-    - No greetings or conclusions
-    
-    ## Analysis Target
-    ISSUE TO ANALYZE: ${issue}
-
-    ## Supporting Information
-    RELEVANT CODE CHANGES:
-    ${diffAndCombinedFile}
-    `;
-};
+    issue: string,
+    diffAndCombinedFile: string,
+  ): string => {
+    return `
+      # Code Issue Refinement Analysis
+      
+      ## Task Description 
+      Analyze the provided issue within the context of:
+      1. The specific code changes (diff)
+      2. The complete file state
+      3. The broader repository context provided in the uploaded file
+      
+      ## Evaluation Criteria
+      1. Context Validity
+         - Does the issue accurately reflect the current code state? Do not only consider the diffs, but also a much broader context
+         - Is the issue relevant to the changed code sections? Do not only consider the diffs, but also a much broader context
+         - Does the broader repository context support this issue? Do not only consider the diffs, but also a much broader context
+  
+      2. Technical Validity
+         - Is the issue based on concrete, measurable factors?
+         - Can the issue be verified through code analysis?
+  
+      3. Actionability
+         - Can the solution be implemented without major architectural changes?
+         - Is the fix scope clear and contained?
+  
+      ## Issue Classification Examples
+  
+      ### Examples of Issues to DISCARD:
+  
+      1. Premature Optimization:
+         Issue: "The database query should use indexing for better performance"
+         Context: Application is in early stages with small dataset
+         Diff: Shows basic CRUD operations
+         DISCARD: Performance optimization is premature without evidence of performance issues in production
+  
+      2. Misconception of Existing Implementation:
+         Issue: "The password reset token is stored insecurely in plain text"
+         Context: Code shows proper hashing in auth_utils.py
+         Diff: Changes to password reset flow
+         DISCARD: Issue incorrectly assesses existing security measures which are properly implemented
+  
+      3. Style Over Substance:
+         Issue: "Convert all class methods to use arrow functions for consistency"
+         Context: Project uses mix of regular and arrow functions based on use case
+         Diff: New utility methods added
+         DISCARD: Purely stylistic preference without technical merit
+  
+      4. Missing Broader Context:
+         Issue: "Implement caching for this API endpoint"
+         Context: Service uses API Gateway with built-in caching
+         Diff: New API endpoint implementation
+         DISCARD: Caching is already handled at infrastructure level
+  
+      ### Examples of Issues to KEEP:
+  
+      1. Security Vulnerability:
+         Issue: "User role validation missing in new admin endpoint"
+         Context: Repository shows consistent role-based access control
+         Diff: New admin API endpoint
+         KEEP: Critical security check missing in privileged operation
+  
+      2. Data Integrity Risk:
+         Issue: "Race condition in concurrent order processing"
+         Context: High-throughput order system
+         Diff: New order processing logic
+         KEEP: Specific concurrency issue with clear impact on data consistency
+  
+      3. Error Handling Gap:
+         Issue: "Network timeout handling missing in external API call"
+         Context: System integrates with unreliable third-party service
+         Diff: New API integration code
+         KEEP: Resilience issue with clear failure scenario
+  
+      4. Breaking Change:
+         Issue: "New database schema breaks existing migration path"
+         Context: Production system with existing data
+         Diff: Database schema changes
+         KEEP: Concrete issue affecting system stability and deployment
+  
+      ## Required Response Format
+      Respond with exactly one of:
+      - "KEEP: [specific technical reason with actionable details]"
+      - "DISCARD: [specific technical reason with context explanation]"
+  
+      IMPORTANT: 
+      - Start your response with either KEEP or DISCARD immediately
+      - No introduction or additional context
+      - No markdown formatting
+      - No greetings or conclusions
+      
+      ## Analysis Target
+      ISSUE TO ANALYZE: ${issue}
+  
+      ## Supporting Information
+      RELEVANT CODE CHANGES:
+      ${diffAndCombinedFile}
+      `;
+  };
