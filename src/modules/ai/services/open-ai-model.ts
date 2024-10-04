@@ -12,6 +12,7 @@ import {
   contextAwarenessPrompt,
   defaultAssistantPrompt,
   diffsReviewPrompts,
+  refineIssuesPrompt,
 } from '@/prompts';
 
 import { currentVCS } from '../../vcs';
@@ -59,8 +60,11 @@ export class OpenAIModel implements AIModel {
       const responseText = await this.getResponseText(thread.id, assistantId);
 
       if (responseText) {
-        responses.push(responseText);
-        mentionedIssues.push(...extractIssues(responseText));
+        const refinedIssues = await this.refineIssues({issues: extractIssues(responseText), combinedDiffsAndFiles, fileId, assistantId});
+        if (refinedIssues.length > 0) {
+          responses.push(...refinedIssues);
+          mentionedIssues.push(...refinedIssues);
+        }
       }
     }
 
@@ -75,6 +79,28 @@ export class OpenAIModel implements AIModel {
 
     return file.id;
   }
+
+  async refineIssues({issues, combinedDiffsAndFiles, fileId, assistantId}: {issues: string[], combinedDiffsAndFiles: string, fileId: string, assistantId: string}): Promise<string[]> {
+    const refinedIssues: string[] = [];
+
+    for (const issue of issues) {
+      const thread = await this.openai.beta.threads.create();
+      await this.openai.beta.threads.messages.create(thread.id, {
+        role: 'user',
+        content: refineIssuesPrompt(issue, combinedDiffsAndFiles),
+        attachments: [{ file_id: fileId, tools: [{ type: 'file_search' }] }],
+      });
+
+      const responseText = await this.getResponseText(thread.id, assistantId);
+
+      if (responseText?.includes('actionable')) {
+        refinedIssues.push(issue);  
+      }
+    }
+
+    return refinedIssues;
+  }
+
 
   private async createAssistant(): Promise<string> {
     const assistant = await this.openai.beta.assistants.create({
