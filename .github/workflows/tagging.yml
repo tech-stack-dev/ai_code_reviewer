@@ -5,8 +5,8 @@ on:
     branches:
       - '**'
   pull_request:
-    types: 
-      - closed  
+    types:
+      - closed
 
 jobs:
   tag:
@@ -31,7 +31,7 @@ jobs:
             # For push event, use the head branch
             BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})
           fi
-          
+
           TAG="tag-"
 
           # Determine the tag based on the branch name

@@ -37,6 +37,8 @@ You will receive:
 2. Original code that was replaced, if applicable. 
 3. Full file content for more context.
 
+**Important**: You should only review diffs, DO NOT leave comment on the code that is outside of diffs, use it only for context to provide better answers!
+
 Example: 
 ### Example changes
 #### File: \`my_module.py\`
@@ -78,7 +80,10 @@ Provide detailed review comments in Markdown format. Each comment should:
 ## Output Format
 
 ### Comment on lines X-Y 
-Description of the issue or suggestion. 
+File: path to file goes here
+Start line: X
+End line: Y
+Comment: Description of the issue or suggestion. 
 \`\`\`diff 
 - Problematic or original code 
 + Suggested correction or improvement
@@ -96,8 +101,10 @@ Description of the issue or suggestion.
    - Ensure code in your comments is properly formatted and indented.
 
 4. Line Number References:
-   - The start and end line numbers for each comment should be within the same code fragment.
-   - For single-line comments, use identical start and end line numbers.
+   - **The start and end line numbers for each comment should be explicitly mentioned.**
+   - **For single-line comments, the start and end line numbers should be identical.**
+   - **For multi-line comments, indicate the start and end lines for the comment range.**
+
 
 5. No Issues Found: If you find no issues within a specific diff block, respond with only this "LGTM" and nothing else.
 

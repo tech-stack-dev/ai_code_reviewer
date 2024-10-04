@@ -5,6 +5,7 @@ import { WebhookPayload } from '@actions/github/lib/interfaces';
 import { Octokit } from '@octokit/rest';
 import * as fs from 'fs';
 
+import { parseAIReview } from '@/helpers';
 import { DiffFile } from '@/types';
 
 import { CurrentContextVCS, VCS } from '../interfaces';
@@ -163,6 +164,82 @@ export class GitHubVCS implements VCS {
         repo: repoName,
         issue_number: this.pullRequest?.number ?? 0,
         body: comment,
+      });
+    }
+  }
+
+  async postReview(aiReview: string): Promise<void> {
+    if (this.pullRequest) {
+      const parsedReviews = parseAIReview(aiReview);
+
+      const commentPromises = parsedReviews.map(
+        ({ file, startLine, endLine, comment }) =>
+          this.postMultiLineReviewComment({
+            path: file,
+            startLine,
+            endLine,
+            body: comment,
+          }),
+      );
+
+      await Promise.all(commentPromises);
+    }
+  }
+
+  async postMultiLineReviewComment({
+    path,
+    startLine,
+    endLine,
+    body,
+  }: {
+    path: string;
+    startLine: number;
+    endLine: number;
+    body: string;
+  }): Promise<void> {
+    if (this.pullRequest) {
+      const {
+        number,
+        base: { repo },
+      } = this.pullRequest;
+      const owner = repo.owner.login;
+      const repoName = repo.name;
+
+      const { data: pullRequestData } = await this.octokit.pulls.get({
+        owner,
+        repo: repoName,
+        pull_number: number,
+      });
+
+      const commitId = pullRequestData.head.sha;
+
+      // const diffFiles = await this.octokit.pulls.listFiles({
+      //   owner,
+      //   repo: repoName,
+      //   pull_number: number,
+      // });
+
+      // const validFile = diffFiles.data.find((file) => file.filename === path);
+      // if (!validFile) {
+      //   throw new Error(`Invalid file path: ${path}`);
+      // }
+
+      // if (startLine < 0 || endLine > validFile.changes) {
+      //   throw new Error(
+      //     `Invalid line range: ${startLine}-${endLine} in file ${path}`,
+      //   );
+      // }
+
+      await this.octokit.pulls.createReviewComment({
+        owner,
+        repo: repoName,
+        pull_number: number,
+        body: body,
+        commit_id: commitId,
+        start_line: startLine,
+        path: path,
+        line: endLine,
+        side: 'RIGHT',
       });
     }
   }

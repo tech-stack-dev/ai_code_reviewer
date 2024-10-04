@@ -32,8 +32,10 @@ export const reviewIssues = {
         \`\`\`
     
         ### Example response
-        ### Comment on lines 1-3
-        SQL injection risk in authentication. User input is directly interpolated into SQL query. This could allow unauthorized access to all user accounts.
+        File: authentication.py
+        Start line: 1
+        End line: 3
+        Comment: SQL injection risk in authentication. User input is directly interpolated into SQL query. This could allow unauthorized access to all user accounts.
     
         Suggested fix:
         \`\`\`diff
@@ -45,8 +47,12 @@ export const reviewIssues = {
         + )
         \`\`\`
     
-        ### Comment on lines 5-8
-        Multiple security issues:
+        ---
+
+        File: authentication.py
+        Start line: 5
+        End line: 8
+        Comment:  Multiple security issues:
         1. Storing plain-text passwords without hashing
         2. SQL injection vulnerability in token validation
         3. Missing password complexity validation
@@ -65,9 +71,13 @@ export const reviewIssues = {
         +   )
         \`\`\`
     
-        ### Comment on lines 10-15
-        Exposing sensitive credit card information in logs and storing unencrypted card numbers.
-    
+        ---
+
+        File: authentication.py
+        Start line: 10
+        End line: 15
+        Comment: Exposing sensitive credit card information in logs and storing unencrypted card numbers.
+
         Suggested fix:
         \`\`\`diff
         def process_payment(payment_info):
@@ -128,9 +138,12 @@ export const reviewIssues = {
         \`\`\`
     
         ### Example response
-        ### Comment on lines 2-9
-        N+1 query problem in user fetching. Making separate database queries for each user's posts will significantly impact performance as the number of users grows.
-    
+
+        File: user_service.py
+        Start line: 2
+        End line: 9
+        Comment:  N+1 query problem in user fetching. Making separate database queries for each user's posts will significantly impact performance as the number of users grows.
+       
         Suggested fix:
         \`\`\`diff
         def get_users(self):
@@ -151,8 +164,12 @@ export const reviewIssues = {
         +   return [{**user, "posts": posts_by_user[user.id]} for user in users]
         \`\`\`
     
-        ### Comment on lines 11-21
-        Important issues with resource management and error handling:
+        ---
+
+        File: user_service.py
+        Start line: 11
+        End line: 21
+        Comment: Important issues with resource management and error handling:
         1. Database connection not properly closed (potential resource leak)
         2. Cursor not properly closed
         3. Generic exception handling with print statement
@@ -184,9 +201,13 @@ export const reviewIssues = {
         +                 logger.error(f"Database error creating user: {e}")
         +                 raise
         \`\`\`
+
+        ---
     
-        ### Comment on lines 23-27
-        File handle not properly closed.
+        File: user_service.py
+        Start line: 23
+        End line: 27
+        Comment: File handle not properly closed.
     
         Suggested fix:
         \`\`\`diff
@@ -235,8 +256,11 @@ export const reviewIssues = {
         \`\`\`
     
         ### Example response
-        ### Comment on lines 1-6
-        Code style and readability improvements needed:
+
+        File: helper.py
+        Start line: 1
+        End line: 6
+        Comment: Code style and readability improvements needed:
         1. Unclear variable names
         2. Inconsistent spacing around operators
         3. Missing type hints and docstring
@@ -264,8 +288,12 @@ export const reviewIssues = {
         +     return 0
         \`\`\`
     
-        ### Comment on lines 8-12
-        Minor improvements for variable naming and use of built-in functions:
+        ---
+
+        File: helper.py
+        Start line: 8
+        End line: 12
+        Comment: Minor improvements for variable naming and use of built-in functions:
     
         \`\`\`diff
         - def calc_avg(l):
@@ -279,9 +307,13 @@ export const reviewIssues = {
         +         raise ValueError("Cannot calculate average of empty list")
         +     return sum(numbers) / len(numbers)
         \`\`\`
+
+        ---
     
-        ### Comment on lines 14-15
-        Function signature could be improved with type hints and default parameter:
+        File: helper.py
+        Start line: 14
+        End line: 15
+        Comment: Function signature could be improved with type hints and default parameter:
     
         \`\`\`diff
         - def format_output(lst,separator):
