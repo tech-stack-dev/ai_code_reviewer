@@ -230,17 +230,30 @@ export class GitHubVCS implements VCS {
       //   );
       // }
 
-      await this.octokit.pulls.createReviewComment({
-        owner,
-        repo: repoName,
-        pull_number: number,
-        body: body,
-        commit_id: commitId,
-        start_line: startLine,
-        path: path,
-        line: endLine,
-        side: 'RIGHT',
-      });
+      if (startLine === endLine) {
+        await this.octokit.pulls.createReviewComment({
+          owner,
+          repo: repoName,
+          pull_number: number,
+          body: body,
+          commit_id: commitId,
+          path: path,
+          line: startLine,
+          side: 'RIGHT',
+        });
+      } else {
+        await this.octokit.pulls.createReviewComment({
+          owner,
+          repo: repoName,
+          pull_number: number,
+          body: body,
+          commit_id: commitId,
+          start_line: startLine,
+          path: path,
+          line: endLine,
+          side: 'RIGHT',
+        });
+      }
     }
   }
 }
