@@ -6,7 +6,7 @@ import { Octokit } from '@octokit/rest';
 import * as fs from 'fs';
 
 import { parseAIReview } from '@/helpers';
-import { DiffFile } from '@/types';
+import { CommentParams, DiffFile } from '@/types';
 
 import { CurrentContextVCS, VCS } from '../interfaces';
 
@@ -68,11 +68,17 @@ export class GitHubVCS implements VCS {
           const {
             base: { repo },
           } = this.pullRequest;
+
           const owner = repo.owner.login;
           const repoName = repo.name;
 
           if (file.status === 'added') {
-            return `File: ${file.filename}\n\nContent (new file):\n${file.patch}`;
+            return `
+            ### File: ${file.filename}
+            
+            ### Diff (New File, Start line and End line should be specified from here):
+            ${file.patch}
+            `;
           } else if (file.status === 'modified' && owner && repoName) {
             const fileContentResponse = await this.octokit.repos.getContent({
               owner,
@@ -81,14 +87,12 @@ export class GitHubVCS implements VCS {
               mediaType: { format: 'raw' },
             });
 
-            console.log(`FILE PATCH: ${file.patch}`)
-
             const fullFileContent =
               fileContentResponse.data as unknown as string;
             return `
               ### File: ${file.filename}
 
-              ### Diff (Start Line and End Line should be specified from here):
+              ### Diff (Start line and End line of a review comment must be taken from here, **include only hunk numbers in comments**):
               ${file.patch}
               
               ### Full File content (Should be used only for context):
@@ -184,7 +188,7 @@ export class GitHubVCS implements VCS {
 
       const commentPromises = parsedReviews.map(
         ({ file, startLine, endLine, comment }) =>
-          this.postMultiLineReviewComment({
+          this.postReviewComment({
             path: file,
             startLine,
             endLine,
@@ -196,74 +200,55 @@ export class GitHubVCS implements VCS {
     }
   }
 
-  async postMultiLineReviewComment({
-    path,
-    startLine,
-    endLine,
-    body,
-  }: {
+  async postReviewComment(params: {
     path: string;
     startLine: number;
     endLine: number;
     body: string;
   }): Promise<void> {
-    if (this.pullRequest) {
+    try {
+      if (!this.pullRequest) return;
+
+      const { path, startLine, endLine, body } = params;
+
       const {
         number,
         base: { repo },
       } = this.pullRequest;
-      const owner = repo.owner.login;
-      const repoName = repo.name;
+      const { owner, name: repoName } = repo;
 
       const { data: pullRequestData } = await this.octokit.pulls.get({
-        owner,
+        owner: owner.login,
         repo: repoName,
         pull_number: number,
       });
 
       const commitId = pullRequestData.head.sha;
 
-      // const diffFiles = await this.octokit.pulls.listFiles({
-      //   owner,
-      //   repo: repoName,
-      //   pull_number: number,
-      // });
-
-      // const validFile = diffFiles.data.find((file) => file.filename === path);
-      // if (!validFile) {
-      //   throw new Error(`Invalid file path: ${path}`);
-      // }
-
-      // if (startLine < 0 || endLine > validFile.changes) {
-      //   throw new Error(
-      //     `Invalid line range: ${startLine}-${endLine} in file ${path}`,
-      //   );
-      // }
+      const commentParams: CommentParams = {
+        owner: owner.login,
+        repo: repoName,
+        pull_number: number,
+        body,
+        commit_id: commitId,
+        path,
+        side: 'RIGHT',
+      };
 
       if (startLine === endLine) {
         await this.octokit.pulls.createReviewComment({
-          owner,
-          repo: repoName,
-          pull_number: number,
-          body: body,
-          commit_id: commitId,
-          path: path,
+          ...commentParams,
           line: startLine,
-          side: 'RIGHT',
         });
       } else {
         await this.octokit.pulls.createReviewComment({
-          owner,
-          repo: repoName,
-          pull_number: number,
-          body: body,
-          commit_id: commitId,
+          ...commentParams,
           start_line: startLine,
-          path: path,
           line: endLine,
-          side: 'RIGHT',
         });
       }
+    } catch (error) {
+      console.log('Error while leave a review comment!', error);
     }
   }
 }

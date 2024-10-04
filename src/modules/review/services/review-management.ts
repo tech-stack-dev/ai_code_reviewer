@@ -15,6 +15,8 @@ export class ReviewManagement {
       const combinedDiffsAndFiles =
         await this.vcs.getDiffsAndFullFilesContent();
 
+        console.log(combinedDiffsAndFiles);
+
       const repositoryFileName = await this.vcs.bundleRepositoryToTxt();
       const aiReview = await this.aiModel.generateReview(
         combinedDiffsAndFiles ?? '',

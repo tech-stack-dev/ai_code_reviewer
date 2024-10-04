@@ -11,30 +11,55 @@ export const reviewIssues = {
       'Violation of coding standards that could lead to major issues.',
     ],
     responseExample: `
-        ### Example changes
-        #### File: authentication.py:
-        \`\`\`python
-        1: def authenticate_user(username, password):
-        2:    query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
-        3:    return db.execute(query)
-        4:
-        5: def reset_password(token, new_password):
-        6:    # No password validation or hashing
-        7:    query = f"UPDATE users SET password = '{new_password}' WHERE reset_token = '{token}'"
-        8:    return db.execute(query)
-        10:
-        11: def process_payment(payment_info):
-        12:    credit_card = payment_info["credit_card"]
-        13:    # Logging sensitive data
-        14:    logging.info(f"Processing payment for card: {credit_card}")
-        15:    # No encryption for sensitive data
-        16:    return db.execute("INSERT INTO payments (card_number) VALUES (%s)", (credit_card,))
+        ### File: authentication.py
+        
+        ### Diff (Start line and End line of a review comment must be taken from here, **include only hunk numbers in comments**):
+        \`\`\`diff
+        @@ -4,6 +4,6 @@
+            query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
+            return db.execute(query)
+        
+        @@ -8,9 +8,9 @@
+            # No password validation or hashing
+            query = f"UPDATE users SET password = '{new_password}' WHERE reset_token = '{token}'"
+            return db.execute(query)
+        
+        @@ -12,15 +12,15 @@
+            credit_card = payment_info["credit_card"]
+            # Logging sensitive data
+            logging.info(f"Processing payment for card: {credit_card}")
+            # No encryption for sensitive data
+            return db.execute("INSERT INTO payments (card_number) VALUES (%s)", (credit_card,))
         \`\`\`
+    
+
+        ### Full file content (Should be used only for context):
+        \`\`\`python
+        import logging
+        from db import db
+        
+        def authenticate_user(username, password):
+            query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
+            return db.execute(query)
+        
+        def reset_password(token, new_password):
+            # No password validation or hashing
+            query = f"UPDATE users SET password = '{new_password}' WHERE reset_token = '{token}'"
+            return db.execute(query)
+        
+        def process_payment(payment_info):
+            credit_card = payment_info["credit_card"]
+            # Logging sensitive data
+            logging.info(f"Processing payment for card: {credit_card}")
+            # No encryption for sensitive data
+            return db.execute("INSERT INTO payments (card_number) VALUES (%s)", (credit_card,))
+        \`\`\`
+
     
         ### Example response
         File: authentication.py
-        Start line: 2
-        End line: 3
+        Start line: 4
+        End line: 5
         Comment: SQL injection risk in authentication. User input is directly interpolated into SQL query. This could allow unauthorized access to all user accounts.
     
         Suggested fix:
@@ -50,9 +75,9 @@ export const reviewIssues = {
         ---
 
         File: authentication.py
-        Start line: 7
-        End line: 8
-        Comment:  Multiple security issues:
+        Start line: 9
+        End line: 10
+        Comment: Multiple security issues:
         1. Storing plain-text passwords without hashing
         2. SQL injection vulnerability in token validation
         3. Missing password complexity validation
@@ -105,44 +130,78 @@ export const reviewIssues = {
       'Inconsistent use of error messages or lack of user feedback in the UI.',
     ],
     responseExample: `
-        ### Example changes
-        #### File: user_service.py:
+        ### File: user_service.py
+
+        ### Diff (Start line and End line of a review comment must be taken from here, **include only hunk numbers in comments**):
+        \`\`\`diff
+        @@ -5,9 +5,9 @@
+            def get_users(self):
+                results = []
+                users = db.query("SELECT * FROM users")
+                for user in users:
+                    # N+1 query problem
+                    posts = db.query(f"SELECT * FROM posts WHERE user_id = {user.id}")
+                    results.append({**user, "posts": posts})
+                return results
+        
+        @@ -15,21 +15,21 @@
+                # No type hints or input validation
+                db_conn = get_db_connection()
+                try:
+                    if "username" in data:
+                        cursor = db_conn.cursor()
+                        cursor.execute("INSERT INTO users SET ?", data)
+                        return True
+                except Exception as e:
+                    print(f"Error: {e}")
+                    return False
+        
+        @@ -24,27 +24,27 @@
+                file = open('output.txt', 'w')
+                for item in items:
+                    file.write(str(item))
+                return True
+        \`\`\`
+
+        ### Full file content (Should be used only for context):
         \`\`\`python
-        1: class UserService:
-        2:     def get_users(self):
-        3:         results = []
-        4:         users = db.query("SELECT * FROM users")
-        5:         for user in users:
-        6:             # N+1 query problem
-        7:             posts = db.query(f"SELECT * FROM posts WHERE user_id = {user.id}")
-        8:             results.append({**user, "posts": posts})
-        9:         return results
-        10:
-        11:     def create_user(self, data):
-        12:         # No type hints or input validation
-        13:         db_conn = get_db_connection()
-        14:         try:
-        15:             if "username" in data:
-        16:                 cursor = db_conn.cursor()
-        17:                 cursor.execute("INSERT INTO users SET ?", data)
-        18:                 return True
-        19:         except Exception as e:
-        20:             print(f"Error: {e}")
-        21:             return False
-        22:
-        23:     def process_large_dataset(self, items):
-        24:         file = open('output.txt', 'w')
-        25:         for item in items:
-        26:             file.write(str(item))
-        27:         return True
+        from db import db, get_db_connection
+        from collections import defaultdict
+        
+        class UserService:
+            def get_users(self):
+                results = []
+                users = db.query("SELECT * FROM users")
+                for user in users:
+                    # N+1 query problem
+                    posts = db.query(f"SELECT * FROM posts WHERE user_id = {user.id}")
+                    results.append({**user, "posts": posts})
+                return results
+        
+            def create_user(self, data):
+                # No type hints or input validation
+                db_conn = get_db_connection()
+                try:
+                    if "username" in data:
+                        cursor = db_conn.cursor()
+                        cursor.execute("INSERT INTO users SET ?", data)
+                        return True
+                except Exception as e:
+                    print(f"Error: {e}")
+                    return False
+        
+            def process_large_dataset(self, items):
+                file = open('output.txt', 'w')
+                for item in items:
+                    file.write(str(item))
+                return True
         \`\`\`
     
         ### Example response
-
         File: user_service.py
-        Start line: 3
-        End line: 9
-        Comment:  N+1 query problem in user fetching. Making separate database queries for each user's posts will significantly impact performance as the number of users grows.
+        Start line: 5
+        End line: 8
+        Comment: N+1 query problem in user fetching. Making separate database queries for each user's posts will significantly impact performance as the number of users grows.
        
         Suggested fix:
         \`\`\`diff
@@ -167,7 +226,7 @@ export const reviewIssues = {
         ---
 
         File: user_service.py
-        Start line: 13
+        Start line: 15
         End line: 21
         Comment: Important issues with resource management and error handling:
         1. Database connection not properly closed (potential resource leak)
@@ -235,30 +294,53 @@ export const reviewIssues = {
       'General best practices (e.g., favoring immutability, avoiding global variables).',
     ],
     responseExample: `
-        ### Example changes
-        #### File: helper.py:
-        \`\`\`python
-        1: def process(d):
-        2:     x = d.get('val')
-        3:     if x!=None:
-        4:         r = x*2
-        5:         return r
-        6:     return 0
-        7:
-        8: def calc_avg(l):
-        9:     s = 0
-        10:    for i in l:
-        11:        s+=i
-        12:    return s/len(l)
-        13:
-        14: def format_output(lst,separator):
-        15:    return separator.join([str(i) for i in lst])
+        ### File: helper.py
+
+        ### Diff (Start line and End line of a review comment must be taken from here, **include only hunk numbers in comments**):
+        \`\`\`diff
+        @@ -1,6 +1,6 @@
+            def process(d):
+                x = d.get('val')
+                if x!=None:
+                    r = x*2
+                    return r
+                return 0
+        
+        @@ -8,12 +8,12 @@
+            def calc_avg(l):
+                s = 0
+                for i in l:
+                    s+=i
+                return s/len(l)
+        
+        @@ -14,15 +14,15 @@
+            def format_output(lst,separator):
+                return separator.join([str(i) for i in lst])
         \`\`\`
+
+        ### Full file content (Should be used only for context):
+        \`\`\`python
+        def process(d):
+            x = d.get('val')
+            if x!=None:
+                r = x*2
+                return r
+            return 0
+        
+        def calc_avg(l):
+            s = 0
+            for i in l:
+                s+=i
+            return s/len(l)
+        
+        def format_output(lst,separator):
+            return separator.join([str(i) for i in lst])
+        \`\`\`
+        
     
         ### Example response
-
         File: helper.py
-        Start line: 2
+        Start line: 1
         End line: 6
         Comment: Code style and readability improvements needed:
         1. Unclear variable names
@@ -291,7 +373,7 @@ export const reviewIssues = {
         ---
 
         File: helper.py
-        Start line: 9
+        Start line: 8
         End line: 12
         Comment: Minor improvements for variable naming and use of built-in functions:
     
