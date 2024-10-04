@@ -78,11 +78,16 @@ Provide detailed review comments in Markdown format. Each comment should:
 ## Output Format
 
 ### Comment on lines X-Y 
-Description of the issue or suggestion. 
+File: path to file goes here
+Start line: X (from hunk, **must be  >= 1**, must be inside of the same hunk as End line)
+End line: Y (from hunk, **must be >= 1**, must be inside of the same hunk as Start line)
+Comment: Description of the issue or suggestion. 
+
 \`\`\`diff 
 - Problematic or original code 
 + Suggested correction or improvement
 \`\`\`
+
 
 ## Review Guidelines
 
