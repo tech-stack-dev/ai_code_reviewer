@@ -93,6 +93,7 @@ Example of diff hunks:
 3. Always specify which hunk number (N) the comment refers to
 4. Never reference lines across different hunks - each comment should address issues within a single hunk only
 5. If an issue spans multiple hunks, create separate comments for each hunk
+6. Any comment with line number 0 will be rejected by the system
 
 ## Output Format
 

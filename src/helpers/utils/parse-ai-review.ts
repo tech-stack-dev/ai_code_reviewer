@@ -3,8 +3,6 @@ import { ParsedAIReview } from '@/types';
 export const parseAIReview = (aiReview: string): ParsedAIReview[] => {
   const reviews: ParsedAIReview[] = [];
 
-  console.log(aiReview);
-
   const reviewBlocks = aiReview.split('---');
 
   for (const block of reviewBlocks) {
@@ -27,6 +25,5 @@ export const parseAIReview = (aiReview: string): ParsedAIReview[] => {
     }
   }
 
-  console.log('PARSED REVIEWS', reviews);
   return reviews;
 };
