@@ -65,7 +65,7 @@ Example:
 
 ## Expected Output
 ### Each review comment should:
-1. Use line numbers from the diff hunks only (must be >= 1, never 0)
+1. Use line numbers from the diff hunks only **(must be >= 1, never 0)**
 2. Focus on a single, specific issue
 3. Include a minimal code example showing the fix
 4. Be constructive and actionable
@@ -96,11 +96,14 @@ Example of diff hunks:
 
 ## Output Format
 
+Example: If the first changed line in a hunk is line 1, use 1 as the start line. NEVER use line 0.
+
 ### Comment on lines X-Y 
 File: path to file goes here
-Start line: X (from hunk, must be >= 1, must be inside of the same hunk as End line)
-End line: Y (from hunk, must be >= 1, must be inside of the same hunk as Start line)
+Start line: X (from hunk, **must be  >= 1**, must be inside of the same hunk as End line)
+End line: Y (from hunk, **must be >= 1**, must be inside of the same hunk as Start line)
 Comment: Description of the issue or suggestion. 
+
 \`\`\`diff 
 - Problematic or original code 
 + Suggested correction or improvement
