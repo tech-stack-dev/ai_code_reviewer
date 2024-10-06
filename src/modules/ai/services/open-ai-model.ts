@@ -60,7 +60,6 @@ export class OpenAIModel implements AIModel {
       });
 
       const responseText = await this.getResponseText(thread.id, assistantId);
-      console.log('AI RESPONSE TEXT', responseText);
       if (responseText) {
         const refinedIssues = await this.refineIssues({
           issues: extractIssues(responseText),
@@ -98,7 +97,6 @@ export class OpenAIModel implements AIModel {
     fileId: string;
     assistantId: string;
   }): Promise<string[]> {
-    console.log('ISSUES', issues);
     const processIssue = async (issue: string): Promise<string | null> => {
       const thread = await this.openai.beta.threads.create();
 
@@ -111,12 +109,13 @@ export class OpenAIModel implements AIModel {
       });
 
       const responseText = await this.getResponseText(thread.id, assistantId);
-      console.log('RESPONSE TEXT', responseText);
-      return responseText?.toLowerCase().startsWith('keep:') ? issue : null;
+      return responseText?.toLowerCase().startsWith('keep:') ||
+        responseText?.toLowerCase().startsWith('modify:')
+        ? issue
+        : null;
     };
 
     const results = await Promise.all(issues.map(processIssue));
-    console.log('RESULTS', results);
     return results.filter((issue): issue is string => issue !== null);
   }
 

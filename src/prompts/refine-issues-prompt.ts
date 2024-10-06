@@ -1,8 +1,8 @@
 export const refineIssuesPrompt = (
-   issue: string,
-   diffAndCombinedFile: string,
- ): string => {
-   return `
+  issue: string,
+  diffAndCombinedFile: string,
+): string => {
+  return `
         # Code Issue Refinement Analysis
         
         ## Task Description 
@@ -43,93 +43,103 @@ export const refineIssuesPrompt = (
         ## Issue Classification Examples
     
          ### Examples of Issues to DISCARD:
-  
-      1. Pattern Contradiction:
-         Issue: "Switch from class components to functional components with hooks"
-         Context: Repository consistently uses class components by design
-         Diff: New component implementation
-         DISCARD: Contradicts established project pattern, despite hooks being modern best practice
-  
-      2. Architecture Violation:
-         Issue: "Move state management to Redux"
-         Context: Repository uses custom state management solution documented in architecture.md
-         Diff: New feature implementation
-         DISCARD: Conflicts with intentional architectural decision
-  
-      3. Convention Override:
-         Issue: "Use async/await instead of Promises"
-         Context: Codebase standardizes on Promise chains
-         Diff: New async operations
-         DISCARD: Violates established convention despite async/await being newer
-  
-      4. Context-Blind Suggestion:
-         Issue: "Extract this logic into a utility function"
-         Context: Similar logic intentionally duplicated for performance reasons (documented)
-         Diff: New business logic
-         DISCARD: Ignores documented technical decision
-  
-      ### Examples of Issues to KEEP:
-  
-      1. Pattern Violation:
-         Issue: "New component bypasses authentication middleware"
-         Context: Repository shows consistent auth pattern in all routes
-         Diff: New API route
-         KEEP: Violates established security pattern
-  
-      2. Consistency Break:
-         Issue: "Error handling doesn't follow project's error boundary pattern"
-         Context: Repository has clear error handling strategy
-         Diff: New feature with custom error handling
-         KEEP: Breaks established error management pattern
-  
-      3. Architecture Misalignment:
-         Issue: "Direct database access bypasses repository pattern"
-         Context: Project strictly uses repository pattern for data access
-         Diff: New data access implementation
-         KEEP: Violates core architectural pattern
-  
-      4. Convention Breach:
-         Issue: "Missing input validation based on project's validation scheme"
-         Context: Repository has consistent validation approach
-         Diff: New form handling
-         KEEP: Fails to follow established validation pattern
+   
+         1. Pattern Contradiction:
+            Issue: "Switch from class components to functional components with hooks"
+            Context: Repository consistently uses class components by design
+            Diff: New component implementation
+            DISCARD: Contradicts established project pattern, despite hooks being modern best practice
+   
+         2. Architecture Violation:
+            Issue: "Move state management to Redux"
+            Context: Repository uses custom state management solution documented in architecture.md
+            Diff: New feature implementation
+            DISCARD: Conflicts with intentional architectural decision
+   
+         3. Convention Override:
+            Issue: "Use async/await instead of Promises"
+            Context: Codebase standardizes on Promise chains
+            Diff: New async operations
+            DISCARD: Violates established convention despite async/await being newer
+   
+         4. Context-Blind Suggestion:
+            Issue: "Extract this logic into a utility function"
+            Context: Similar logic intentionally duplicated for performance reasons (documented)
+            Diff: New business logic
+            DISCARD: Ignores documented technical decision
+   
+         ### Examples of Issues to KEEP:
+   
+         1. Pattern Violation:
+            Issue: "New component bypasses authentication middleware"
+            Context: Repository shows consistent auth pattern in all routes
+            Diff: New API route
+            KEEP: Violates established security pattern
+   
+         2. Consistency Break:
+            Issue: "Error handling doesn't follow project's error boundary pattern"
+            Context: Repository has clear error handling strategy
+            Diff: New feature with custom error handling
+            KEEP: Breaks established error management pattern
+   
+         3. Architecture Misalignment:
+            Issue: "Direct database access bypasses repository pattern"
+            Context: Project strictly uses repository pattern for data access
+            Diff: New data access implementation
+            KEEP: Violates core architectural pattern
+   
+         4. Convention Breach:
+            Issue: "Missing input validation based on project's validation scheme"
+            Context: Repository has consistent validation approach
+            Diff: New form handling
+            KEEP: Fails to follow established validation pattern
 
-         
          ### Examples of Issues to MODIFY:
   
          1. Incorrect Issue Identification:
             Issue: "Function 'calculateTotal' is too complex and should be refactored"
             Context: 'calculateTotal' is a simple function, but 'applyDiscounts' is complex
             Diff: Changes to pricing calculation logic
-            MODIFY: "Function 'calculateTotal' is too complex and should be refactored" -> "Function 'applyDiscounts' has high cyclomatic complexity and should be refactored for better maintainability"
+            MODIFY: "Function 'calculateTotal' is too complex and should be refactored" -> "Function 'applyDiscounts' has a logic error inside of the if statement"
    
-         2. Misidentified Component:
-            Issue: "Authentication logic in UserProfile component needs review"
-            Context: Authentication logic is correct, but authorization checks are missing
-            Diff: Updates to user profile management
-            MODIFY: "Authentication logic in UserProfile component needs review" -> "Add proper authorization checks in UserProfile component to ensure secure access control"
-   
-         3. False Performance Concern:
+         2. False Performance Concern:
             Issue: "Replace Array.map with for-loop for better performance"
             Context: The performance difference is negligible in this case, but error handling is missing
             Diff: Data transformation function implementation
             MODIFY: "Replace Array.map with for-loop for better performance" -> "Implement proper error handling in the data transformation function to improve reliability"
    
-         4. Incorrect Styling Suggestion:
+         3. Incorrect Styling Suggestion:
             Issue: "Use double quotes instead of single quotes for string literals"
             Context: The project's style guide allows both quote types, but there's a potential null reference issue
             Diff: New utility function added
             MODIFY: "Use double quotes instead of single quotes for string literals" -> "Add null checks in the new utility function to prevent potential null reference exceptions"
-   
-        ### Examples of Issues to DISCARD:
-        [Previous DISCARD examples remain unchanged]
-    
+
+        ### Additional Notes for MODIFY:
+        - Modify does not mean rephrasing the previous issue. If the issue is correct, it should be marked as either KEEP or DISCARD based on the context.
+        - Use modify only when the mentioned issue is incorrect (not its description but the pointed out issue is not really the issue) and additional issues need to be considered within the same hunk.
+        - If you identify another issue alongside existing ones, present both in the same response format, separated by a new line.
+
         ## Required Response Format
         Respond with exactly one of:
-        - "KEEP: [specific technical reason with actionable details]"
-        - "MODIFY: [original incorrectly identified issue] -> [newly identified valid issue]"
-        - "DISCARD: [specific technical reason with context explanation]"
+        - KEEP: [specific technical reason with actionable details]
+        - DISCARD: [specific technical reason with context explanation]
+        - MODIFY: ### Comment on lines X-Y 
+         File: Path to file  
+         Start line: X  
+         End line: Y  
+         Comment: Description of the issue or suggestion.
+         
+         \`\`\`diff
+         - Problematic or original code
+         + Suggested correction or improvement
+         \`\`\` 
     
+         ### Additional Notes for MODIFY response format:
+         - Begin with a new issue without referencing the previous one.
+         - Do not mention the prior issue in your review.
+         - Provide the new issue description directly, without an introductory statement.
+         - Ensure the description is clear and actionable.
+
         IMPORTANT: 
         - Start your response with either KEEP, MODIFY, or DISCARD immediately
         - Use MODIFY only when the original issue is incorrectly identified, but another valid issue exists in the code changes
@@ -146,5 +156,4 @@ export const refineIssuesPrompt = (
         RELEVANT CODE CHANGES:
         ${diffAndCombinedFile}
         `;
- };
- 
+};
