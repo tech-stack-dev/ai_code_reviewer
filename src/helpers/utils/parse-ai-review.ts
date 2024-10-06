@@ -1,5 +1,12 @@
 import { ParsedAIReview } from '@/types';
-import { FILE_REGEX, START_LINE_REGEX, END_LINE_REGEX, COMMENT_REGEX, TRIM_UNWANTED_CHARS_REGEX } from '../regex';
+
+import {
+  COMMENT_REGEX,
+  END_LINE_REGEX,
+  FILE_REGEX,
+  START_LINE_REGEX,
+  TRIM_UNWANTED_CHARS_REGEX,
+} from '../regex';
 
 export const parseAIReview = (aiReview: string): ParsedAIReview[] => {
   const reviews: ParsedAIReview[] = [];

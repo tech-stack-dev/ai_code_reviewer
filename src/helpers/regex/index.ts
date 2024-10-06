@@ -1,2 +1,2 @@
 export * from './mentioned-issue';
-export * from './ai-review-response'
+export * from './ai-review-response';
