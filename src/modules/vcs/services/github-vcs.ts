@@ -248,7 +248,7 @@ export class GitHubVCS implements VCS {
         });
       }
     } catch (error) {
-      console.log('Error while leave a review comment!', error);
+      console.log('Error while leave a review comment: ', error);
     }
   }
 }
