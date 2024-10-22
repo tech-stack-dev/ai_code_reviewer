@@ -5,7 +5,8 @@ import { WebhookPayload } from '@actions/github/lib/interfaces';
 import { Octokit } from '@octokit/rest';
 import * as fs from 'fs';
 
-import { DiffFile } from '@/types';
+import { parseAIReview } from '@/helpers';
+import { CommentParams, DiffFile } from '@/types';
 
 import { CurrentContextVCS, VCS } from '../interfaces';
 
@@ -67,11 +68,17 @@ export class GitHubVCS implements VCS {
           const {
             base: { repo },
           } = this.pullRequest;
+
           const owner = repo.owner.login;
           const repoName = repo.name;
 
           if (file.status === 'added') {
-            return `File: ${file.filename}\n\nContent (new file):\n${file.patch}`;
+            return `
+            ### File: ${file.filename}
+            
+            ### Diff (New File, Start line and End line should be specified from here):
+            ${file.patch}
+            `;
           } else if (file.status === 'modified' && owner && repoName) {
             const fileContentResponse = await this.octokit.repos.getContent({
               owner,
@@ -82,7 +89,15 @@ export class GitHubVCS implements VCS {
 
             const fullFileContent =
               fileContentResponse.data as unknown as string;
-            return `File: ${file.filename}\n\nDiff:\n${file.patch}\n\nFull content:\n${fullFileContent}`;
+            return `
+              ### File: ${file.filename}
+
+              ### Diff (Start line and End line of a review comment must be taken from here, **include only hunk numbers in comments**):
+              ${file.patch}
+              
+              ### Full File content (Should be used only for context):
+              
+              ${fullFileContent}`;
           }
         }
       }),
@@ -164,6 +179,76 @@ export class GitHubVCS implements VCS {
         issue_number: this.pullRequest?.number ?? 0,
         body: comment,
       });
+    }
+  }
+
+  async postReview(aiReview: string): Promise<void> {
+    if (this.pullRequest) {
+      const parsedReviews = parseAIReview(aiReview);
+
+      const commentPromises = parsedReviews.map(
+        ({ file, startLine, endLine, comment }) =>
+          this.postReviewComment({
+            path: file,
+            startLine,
+            endLine,
+            body: comment,
+          }),
+      );
+
+      await Promise.all(commentPromises);
+    }
+  }
+
+  async postReviewComment(params: {
+    path: string;
+    startLine: number;
+    endLine: number;
+    body: string;
+  }): Promise<void> {
+    try {
+      if (!this.pullRequest) return;
+
+      const { path, startLine, endLine, body } = params;
+
+      const {
+        number,
+        base: { repo },
+      } = this.pullRequest;
+      const { owner, name: repoName } = repo;
+
+      const { data: pullRequestData } = await this.octokit.pulls.get({
+        owner: owner.login,
+        repo: repoName,
+        pull_number: number,
+      });
+
+      const commitId = pullRequestData.head.sha;
+
+      const commentParams: CommentParams = {
+        owner: owner.login,
+        repo: repoName,
+        pull_number: number,
+        body,
+        commit_id: commitId,
+        path,
+        side: 'RIGHT',
+      };
+
+      if (startLine === endLine) {
+        await this.octokit.pulls.createReviewComment({
+          ...commentParams,
+          line: startLine,
+        });
+      } else {
+        await this.octokit.pulls.createReviewComment({
+          ...commentParams,
+          start_line: startLine,
+          line: endLine,
+        });
+      }
+    } catch (error) {
+      console.log('Error while leave a review comment: ', error);
     }
   }
 }

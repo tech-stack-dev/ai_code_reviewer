@@ -14,3 +14,10 @@ export type DiffFile = {
   status: DiffStatus;
   previous_filename?: string;
 };
+
+export type ParsedAIReview = {
+  file: string;
+  startLine: number;
+  endLine: number;
+  comment: string;
+};

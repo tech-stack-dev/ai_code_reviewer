@@ -44,6 +44,7 @@ export class OpenAIModel implements AIModel {
 
     for (const config of Object.keys(reviewIssues)) {
       const typedConfig = config as keyof typeof reviewIssues;
+
       const currentPrompt = this.generateReviewPrompt(
         combinedDiffsAndFiles,
         mentionedIssues,
