@@ -12,6 +12,7 @@ import {
   contextAwarenessPrompt,
   defaultAssistantPrompt,
   diffsReviewPrompts,
+  refineIssuesPrompt,
 } from '@/prompts';
 
 import { currentVCS } from '../../vcs';
@@ -42,6 +43,8 @@ export class OpenAIModel implements AIModel {
       attachments: [{ file_id: fileId, tools: [{ type: 'file_search' }] }],
     });
 
+    await this.getResponseText(thread.id, assistantId);
+
     for (const config of Object.keys(reviewIssues)) {
       const typedConfig = config as keyof typeof reviewIssues;
 
@@ -58,10 +61,17 @@ export class OpenAIModel implements AIModel {
       });
 
       const responseText = await this.getResponseText(thread.id, assistantId);
-
       if (responseText) {
-        responses.push(responseText);
-        mentionedIssues.push(...extractIssues(responseText));
+        const refinedIssues = await this.refineIssues({
+          issues: extractIssues(responseText),
+          combinedDiffsAndFiles,
+          fileId,
+          assistantId,
+        });
+        if (refinedIssues.length > 0) {
+          responses.push(...refinedIssues);
+          mentionedIssues.push(...refinedIssues);
+        }
       }
     }
 
@@ -75,6 +85,39 @@ export class OpenAIModel implements AIModel {
     });
 
     return file.id;
+  }
+
+  async refineIssues({
+    issues,
+    combinedDiffsAndFiles,
+    fileId,
+    assistantId,
+  }: {
+    issues: string[];
+    combinedDiffsAndFiles: string;
+    fileId: string;
+    assistantId: string;
+  }): Promise<string[]> {
+    const processIssue = async (issue: string): Promise<string | null> => {
+      const thread = await this.openai.beta.threads.create();
+
+      const promptContent = refineIssuesPrompt(issue, combinedDiffsAndFiles);
+
+      await this.openai.beta.threads.messages.create(thread.id, {
+        role: 'user',
+        content: promptContent,
+        attachments: [{ file_id: fileId, tools: [{ type: 'file_search' }] }],
+      });
+
+      const responseText = await this.getResponseText(thread.id, assistantId);
+      return responseText?.toLowerCase().startsWith('keep:') ||
+        responseText?.toLowerCase().startsWith('modify:')
+        ? issue
+        : null;
+    };
+
+    const results = await Promise.all(issues.map(processIssue));
+    return results.filter((issue): issue is string => issue !== null);
   }
 
   private async createAssistant(): Promise<string> {
