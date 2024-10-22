@@ -21,7 +21,7 @@ export class ReviewManagement {
         repositoryFileName,
       );
 
-      await this.vcs.postComment(aiReview);
+      await this.vcs.postReview(aiReview);
     }
   }
 }

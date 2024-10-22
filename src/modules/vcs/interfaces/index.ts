@@ -18,6 +18,7 @@ export interface VCS {
   getCurrentContext(): Promise<CurrentContextVCS>;
   getDiffFiles(prId: number): Promise<DiffFile[] | undefined>;
   postComment(comment: string): Promise<void>;
+  postReview(aiReview: string): Promise<void>;
   getDiffsAndFullFilesContent(): Promise<string | undefined>;
   fetchRepositoryContent(
     path: string,
