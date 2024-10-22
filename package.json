@@ -2,7 +2,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "prepare": "husky install",
+    "prepare": "husky init",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
