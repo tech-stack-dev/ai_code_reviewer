@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   entry: './src/main.ts',
   target: 'node',
   output: {
@@ -13,6 +13,12 @@ module.exports = {
     extensions: ['.ts', '.js'],
     alias: {
       process: 'process/browser',
+      '@/config': path.resolve(__dirname, 'src/config/'),
+      '@/modules': path.resolve(__dirname, 'src/modules/'),
+      '@/core': path.resolve(__dirname, 'src/core/'),
+      '@/prompts': path.resolve(__dirname, 'src/prompts/'),
+      '@/helpers': path.resolve(__dirname, 'src/helpers/'),
+      '@/types': path.resolve(__dirname, 'src/types/'),
     },
   },
   module: {
@@ -21,6 +27,7 @@ module.exports = {
         test: /\.ts$/,
         use: 'ts-loader',
         exclude: /node_modules/,
+        include: [path.resolve(__dirname, 'src')],
       },
     ],
   },

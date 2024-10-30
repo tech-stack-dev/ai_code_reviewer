@@ -10,3 +10,5 @@ node_modules
 
 # Secret files
 .env
+.env*
+.flaskenv*

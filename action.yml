@@ -8,7 +8,9 @@ inputs:
     description: 'Automatically trigger review on PR creation'
     required: false
     default: 'false'
-
+  openai_api_key:
+    description: 'OpenAI API Key for authentication'
+    required: true
 runs:
   using: 'node20'
   main: 'dist/bundle.js'
