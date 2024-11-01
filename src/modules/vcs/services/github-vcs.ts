@@ -28,11 +28,9 @@ export class GitHubVCS implements VCS {
   }
 
   async getCurrentContext(): Promise<CurrentContextVCS> {
-    const autoTrigger = core.getInput('auto_trigger').toLowerCase() === 'true';
-
     return {
       isReviewRequested:
-        this.context.eventName === 'pull_request' && autoTrigger,
+        this.context.eventName === 'pull_request',
     };
   }
 

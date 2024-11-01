@@ -37,7 +37,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           openai_api_key: ${{ secrets.OPENAI_API_KEY }}
-          auto_trigger: 'true'
 ```
 
 ### 2. Configure GitHub Secrets
@@ -52,7 +51,7 @@ You need to add your OpenAI API key to your GitHub repository secrets. Follow th
 
 ### 3. Run the Workflow
 
-Once you've configured the workflow and added your API key, the AI Code Reviewer will automatically trigger when a pull request is opened or synchronized, thanks to the auto_trigger: 'true' setting.
+Once you've configured the workflow and added your API key, the AI Code Reviewer will automatically trigger when a pull request is opened or synchronized.
 
 ### Usage
 
