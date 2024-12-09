@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/modules": ["./src/modules/index.ts"],
+      "@/modules/*": ["./src/modules/*"],
+      "@/config": ["./src/config/index.ts"],
+      "@/config/*": ["./src/config/*"],
+      "@/core": ["./src/core/index.ts"],
+      "@/core/*": ["./src/core/*"],
+      "@/prompts": ["./src/prompts/index.ts"],
+      "@/prompts/*": ["./src/prompts/*"],
+      "@/helpers": ["./src/helpers/index.ts"],
+      "@/helpers/*": ["./src/helpers/*"],
+      "@/types": ["./src/types/index.ts"],
+      "@/types/*": ["./src/types/*"]
+    },
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
