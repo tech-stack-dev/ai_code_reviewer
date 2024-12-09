@@ -1,0 +1,12 @@
+name: AI Code Reviewer
+description: An action to review code in pull requests using AI.
+inputs:
+  github_token:
+    description: 'GitHub Token to access the API'
+    required: true
+  openai_api_key:
+    description: 'OpenAI API Key for authentication'
+    required: true
+runs:
+  using: 'node20'
+  main: 'dist/bundle.js'
